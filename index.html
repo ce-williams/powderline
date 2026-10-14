@@ -35,7 +35,7 @@
           <div class="strip-readings">
             <div class="strip-reading"><span class="reading-label">STATEWIDE NEW SNOW</span><strong>— <small>in</small></strong><em>Reports unavailable</em></div>
             <div class="strip-reading"><span class="reading-label">I–70 MOUNTAIN</span><strong class="road-neutral"><span class="road-mark"></span> CHECK COtrip</strong><em>Official status source</em></div>
-          <div class="strip-reading source-read"><span class="reading-label">CAMERA STATUS</span><strong id="feed-count">Loading camera list</strong><em>Live video is controlled by each resort</em></div>
+            <div class="strip-reading source-read"><span class="reading-label">CAMERA STATUS</span><strong id="feed-count">Loading camera list</strong><em id="feed-detail">Video playback varies by resort</em></div>
           </div>
           <a class="strip-link" href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">OPEN COtrip <span>↗</span></a>
         </section>
@@ -102,36 +102,35 @@
 
         <section class="plans-section" id="plans" aria-labelledby="plans-title">
           <div class="section-heading plans-heading">
-            <div class="heading-left"><span class="section-index">04</span><div><div class="eyebrow">PRODUCT CONCEPT · NO CHECKOUT</div><h2 id="plans-title">Free to ride. More to track.</h2></div></div>
-            <span class="plan-concept-tag">PROTOTYPE</span>
+            <div class="heading-left"><span class="section-index">04</span><div><div class="eyebrow">POWDERLINE PLANS</div><h2 id="plans-title">Free cameras. Pro planning.</h2></div></div>
+            <span class="plan-concept-tag">PRO CONCEPT</span>
           </div>
-          <p class="plans-intro">The live camera wall and essential road links stay free. Pro is a preview of future planning tools; pricing and availability are not set.</p>
-          <p class="plan-preview-status" id="plan-preview-status" aria-live="polite">Free preview selected. Everything currently on Powderline stays available without an account.</p>
-          <div class="plan-cards" id="plan-cards" data-plan-mode="free">
-            <article class="plan-card plan-card-free is-selected">
-              <div class="plan-label">FREE <span>ALWAYS</span></div>
-              <h3>Mountain essentials</h3>
-              <p class="plan-price">$0 <span>no account</span></p>
+          <p class="plans-intro">Everything on Powderline today is free. Here’s how a future planning tier could build on it.</p>
+          <div class="plan-cards">
+            <article class="plan-card plan-card-free">
+              <div class="plan-label"><span>01 / AVAILABLE NOW</span><strong>FREE</strong></div>
+              <div class="plan-card-title"><h3>Mountain essentials</h3><p class="plan-price">$0</p></div>
+              <p class="plan-description">A quick view before you head out.</p>
               <ul>
                 <li>All listed resort cameras and filters</li>
                 <li>Official resort condition reports</li>
-                <li>I–70 safety links to COtrip</li>
+                <li>Road condition links to COtrip</li>
               </ul>
-              <button class="plan-button" type="button" data-plan-select="free" aria-pressed="true">Preview Free</button>
+              <a class="plan-action" href="#mountain-wall">Explore cameras <span aria-hidden="true">↗</span></a>
             </article>
             <article class="plan-card plan-card-pro">
-              <div class="plan-label">PRO <span>FUTURE CONCEPT</span></div>
-              <h3>Storm day planner</h3>
-              <p class="plan-price">Price TBD <span>prototype only</span></p>
+              <div class="plan-label"><span>02 / FUTURE CONCEPT</span><strong>PRO</strong></div>
+              <div class="plan-card-title"><h3>Storm day planner</h3><p class="plan-price plan-price-pro">TBD</p></div>
+              <p class="plan-description">Keep your favorite mountains in view.</p>
               <ul>
-                <li>Save a personal resort watchlist</li>
-                <li>Snowfall history and resort comparisons</li>
-                <li>Optional storm alerts for saved resorts</li>
+                <li>Personal resort watchlist</li>
+                <li>Snowfall history and comparisons</li>
+                <li>Optional alerts for saved resorts</li>
               </ul>
-              <button class="plan-button plan-button-pro" type="button" data-plan-select="pro" aria-pressed="false">Preview Pro</button>
+              <p class="plan-action plan-action-note">Concept preview · no signup yet</p>
             </article>
           </div>
-          <p class="plans-disclaimer">Pro features are design concepts only. No account, payment, alert, or saved-data service is connected.</p>
+          <p class="plans-disclaimer">Pro has no active account, alerts, checkout, or pricing yet.</p>
         </section>
       </main>
 

@@ -137,9 +137,12 @@ function paintClock() {
 function updateFeedCount() {
   const eligible = cameraCards.filter((card) => activeResort === "all" || card.dataset.resort === activeResort);
   const imageReady = eligible.filter((card) => card.querySelector("img.live-image") && card.dataset.ready === "true" && card.dataset.unavailable !== "true").length;
-  document.querySelector("#feed-count").textContent = window.location.protocol === "file:"
-    ? `LOCAL PREVIEW · ${eligible.length} CAMERAS`
-    : `${eligible.length} CAMERAS · ${imageReady} IMAGE FEED${imageReady === 1 ? "" : "S"} VERIFIED`;
+  document.querySelector("#feed-count").textContent = `${eligible.length} CAMERAS LISTED`;
+  document.querySelector("#feed-detail").textContent = window.location.protocol === "file:"
+    ? "Local preview · use hosted page for embeds"
+    : imageReady > 0
+      ? `${imageReady} still image${imageReady === 1 ? "" : "s"} checked · Video at source`
+      : "Video playback varies by resort";
 }
 
 function hideUnavailable(card, reason) {
@@ -255,23 +258,6 @@ document.querySelector("#refresh-all").addEventListener("click", (event) => {
     button.classList.remove("refreshing");
     updateFeedCount();
   }, 2200);
-});
-
-const planCards = document.querySelector("#plan-cards");
-const planPreviewStatus = document.querySelector("#plan-preview-status");
-document.querySelectorAll("[data-plan-select]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const selectedPlan = button.dataset.planSelect;
-    planCards.dataset.planMode = selectedPlan;
-    document.querySelectorAll("[data-plan-select]").forEach((planButton) => {
-      const selected = planButton === button;
-      planButton.setAttribute("aria-pressed", String(selected));
-      planButton.closest(".plan-card").classList.toggle("is-selected", selected);
-    });
-    planPreviewStatus.textContent = selectedPlan === "pro"
-      ? "Pro preview selected. The watchlist, snowfall history, and alerts shown here are future concepts and are not active."
-      : "Free preview selected. Everything currently on Powderline stays available without an account.";
-  });
 });
 
 paintClock();
