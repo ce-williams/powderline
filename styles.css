@@ -273,7 +273,9 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
   .road-cta { min-height: 46px; font-size: 10px; }
   .alt-route { gap: 9px 14px; }
   .alt-route > span, .alt-route a { font-size: 10px; }
-  table { min-width: 505px; }
+  table { min-width: 0; }
+  thead th:nth-child(n+2):nth-child(-n+4), tbody td:nth-child(n+2):nth-child(-n+4) { display: none; }
+  thead th:last-child, tbody td:last-child { text-align: right; }
   th { font-size: 9px; padding: 11px 8px; }
   tbody th, tbody td { font-size: 12px; padding: 12px 8px; }
   tbody td a { font-size: 11px; }
