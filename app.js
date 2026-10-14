@@ -257,6 +257,23 @@ document.querySelector("#refresh-all").addEventListener("click", (event) => {
   }, 2200);
 });
 
+const planCards = document.querySelector("#plan-cards");
+const planPreviewStatus = document.querySelector("#plan-preview-status");
+document.querySelectorAll("[data-plan-select]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const selectedPlan = button.dataset.planSelect;
+    planCards.dataset.planMode = selectedPlan;
+    document.querySelectorAll("[data-plan-select]").forEach((planButton) => {
+      const selected = planButton === button;
+      planButton.setAttribute("aria-pressed", String(selected));
+      planButton.closest(".plan-card").classList.toggle("is-selected", selected);
+    });
+    planPreviewStatus.textContent = selectedPlan === "pro"
+      ? "Pro preview selected. The watchlist, snowfall history, and alerts shown here are future concepts and are not active."
+      : "Free preview selected. Everything currently on Powderline stays available without an account.";
+  });
+});
+
 paintClock();
 window.setInterval(paintClock, 15000);
 window.setInterval(() => {

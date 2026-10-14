@@ -17,9 +17,10 @@
           <span>POWDER<span class="brand-light">LINE</span></span>
         </a>
         <nav class="main-nav" aria-label="Main navigation">
-          <a class="active" href="#mountain-wall">Mountain wall</a>
-          <a href="#resort-report">Resort report</a>
-          <a href="#road-intel">Road intel</a>
+          <a class="active" href="#mountain-wall">Cameras</a>
+          <a href="#resort-report">Reports</a>
+          <a href="#road-intel">Roads</a>
+          <a href="#plans">Plans</a>
         </nav>
         <div class="topbar-right">
           <div class="clock-block"><span class="eyebrow">COLORADO · MT</span><time id="mountain-time">--:--</time></div>
@@ -28,6 +29,7 @@
       </header>
 
       <main id="top">
+        <a class="skip-link" href="#mountain-wall">Skip to mountain cameras</a>
         <section class="instrument-strip" aria-label="Statewide conditions summary">
           <div class="strip-heading"><span class="signal-dot"></span><span>FIELD CONDITIONS</span><span class="strip-date" id="mountain-date"></span></div>
           <div class="strip-readings">
@@ -96,6 +98,40 @@
             <a class="road-cta" href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">OPEN LIVE ROAD CONDITIONS <span>↗</span></a>
             <div class="alt-route"><span>ALTERNATIVE ROUTES</span><a href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">Loveland Pass / US-6 <span>↗</span></a><a href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">US-285 <span>↗</span></a></div>
           </aside>
+        </section>
+
+        <section class="plans-section" id="plans" aria-labelledby="plans-title">
+          <div class="section-heading plans-heading">
+            <div class="heading-left"><span class="section-index">04</span><div><div class="eyebrow">PRODUCT CONCEPT · NO CHECKOUT</div><h2 id="plans-title">Free to ride. More to track.</h2></div></div>
+            <span class="plan-concept-tag">PROTOTYPE</span>
+          </div>
+          <p class="plans-intro">The live camera wall and essential road links stay free. Pro is a preview of future planning tools; pricing and availability are not set.</p>
+          <p class="plan-preview-status" id="plan-preview-status" aria-live="polite">Free preview selected. Everything currently on Powderline stays available without an account.</p>
+          <div class="plan-cards" id="plan-cards" data-plan-mode="free">
+            <article class="plan-card plan-card-free is-selected">
+              <div class="plan-label">FREE <span>ALWAYS</span></div>
+              <h3>Mountain essentials</h3>
+              <p class="plan-price">$0 <span>no account</span></p>
+              <ul>
+                <li>All listed resort cameras and filters</li>
+                <li>Official resort condition reports</li>
+                <li>I–70 safety links to COtrip</li>
+              </ul>
+              <button class="plan-button" type="button" data-plan-select="free" aria-pressed="true">Preview Free</button>
+            </article>
+            <article class="plan-card plan-card-pro">
+              <div class="plan-label">PRO <span>FUTURE CONCEPT</span></div>
+              <h3>Storm day planner</h3>
+              <p class="plan-price">Price TBD <span>prototype only</span></p>
+              <ul>
+                <li>Save a personal resort watchlist</li>
+                <li>Snowfall history and resort comparisons</li>
+                <li>Optional storm alerts for saved resorts</li>
+              </ul>
+              <button class="plan-button plan-button-pro" type="button" data-plan-select="pro" aria-pressed="false">Preview Pro</button>
+            </article>
+          </div>
+          <p class="plans-disclaimer">Pro features are design concepts only. No account, payment, alert, or saved-data service is connected.</p>
         </section>
       </main>
 
