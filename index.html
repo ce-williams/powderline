@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101b1b" />
+    <meta name="description" content="A live field view of Colorado mountain cameras, snow reports, and I-70 travel conditions." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://cache.snow.com; frame-src https://player.brownrice.com https://timecam.tv; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <title>POWDERLINE — Colorado mountain intelligence</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Powderline home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span>POWDER<span class="brand-light">LINE</span></span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <a class="active" href="#mountain-wall">Mountain wall</a>
+          <a href="#resort-report">Resort report</a>
+          <a href="#road-intel">Road intel</a>
+        </nav>
+        <div class="topbar-right">
+          <div class="clock-block"><span class="eyebrow">COLORADO · MT</span><time id="mountain-time">--:--</time></div>
+          <button class="refresh-button" id="refresh-all" type="button" aria-label="Refresh camera feeds"><span class="refresh-icon">↻</span><span>Refresh</span></button>
+        </div>
+      </header>
+
+      <main id="top">
+        <section class="instrument-strip" aria-label="Statewide conditions summary">
+          <div class="strip-heading"><span class="signal-dot"></span><span>FIELD CONDITIONS</span><span class="strip-date" id="mountain-date"></span></div>
+          <div class="strip-readings">
+            <div class="strip-reading"><span class="reading-label">STATEWIDE NEW SNOW</span><strong>— <small>in</small></strong><em>Reports unavailable</em></div>
+            <div class="strip-reading"><span class="reading-label">I–70 MOUNTAIN</span><strong class="road-neutral"><span class="road-mark"></span> CHECK COtrip</strong><em>Official status source</em></div>
+          <div class="strip-reading source-read"><span class="reading-label">CAMERA STATUS</span><strong id="feed-count">Loading camera list</strong><em>Live video is controlled by each resort</em></div>
+          </div>
+          <a class="strip-link" href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">OPEN COtrip <span>↗</span></a>
+        </section>
+
+        <section class="briefing" aria-labelledby="brief-title">
+          <div class="brief-kicker"><span class="section-index">01</span><span>THE MOUNTAIN READ</span><span class="kicker-rule"></span><span class="brief-status">OBSERVATIONS ONLY</span></div>
+          <div class="brief-content">
+            <h1 id="brief-title">See the mountain.<br /><span>Read the day.</span></h1>
+            <div class="brief-copy">
+              <p class="brief-lead">Twenty-six resort cameras across five Colorado resorts. Direct views from the official sources. No invented snow totals.</p>
+              <p class="brief-detail">Resort snowfall and operations reports are not connected yet. Use the official mountain reports below for current measurements; camera views are direct source embeds.</p>
+              <div class="brief-stamps"><span><b class="stamp-icon">◉</b> LIVE CAMS VERIFY AT SOURCE</span><span><b class="stamp-icon muted">≋</b> SNOW REPORTS NOT CONNECTED</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="camera-section" id="mountain-wall" aria-labelledby="camera-title">
+          <div class="section-heading">
+            <div class="heading-left"><span class="section-index">02</span><div><div class="eyebrow">26 CAMERAS · 5 COLORADO RESORTS</div><h2 id="camera-title">Mountain camera wall</h2></div></div>
+            <div class="camera-tools">
+              <label class="sr-only" for="resort-filter">Show cameras for resort</label>
+              <select class="resort-select" id="resort-filter" aria-label="Show cameras for resort"></select>
+              <button class="view-toggle" id="camera-only" type="button" aria-pressed="false"><span class="view-icon">▦</span> Camera only</button>
+            </div>
+          </div>
+
+          <div class="camera-wall" id="camera-wall" aria-live="polite"></div>
+          <p class="camera-footnote"><span>CAMERA NOTE</span> Video players come directly from each resort. Browsers block this page from checking whether a cross-origin video is playing. Keystone’s snow-stake image refreshes every five minutes. Local file previews use direct-player cards; hosted embeds may require the site domain to be approved by the camera provider.</p>
+        </section>
+
+        <section class="lower-grid" id="resort-report">
+          <div class="report-section">
+            <div class="section-heading compact-heading"><div class="heading-left"><span class="section-index">03</span><div><div class="eyebrow">FIVE RESORTS · MEASUREMENTS</div><h2>Resort report</h2></div></div><span class="report-tag">NO LIVE DATA FEED</span></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>RESORT</th><th>24 H</th><th>48 H</th><th>7 DAY</th><th>REPORT</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Vail</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.vail.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Beaver Creek</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.beavercreek.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Breckenridge</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.breckenridge.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Keystone</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.keystoneresort.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Crested Butte</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.skicb.com/the-mountain/mountain-conditions/weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="report-note"><span class="note-rule"></span><p>Snowfall, depth, temperature, and terrain values are left blank until a timestamped resort source is connected. The official report is one click away.</p></div>
+          </div>
+
+          <aside class="road-section" id="road-intel">
+            <div class="road-head"><div><div class="eyebrow">DENVER → THE HIGH COUNTRY</div><h2>I–70 corridor</h2></div><span class="road-signal"><i></i> CHECK COtrip</span></div>
+            <p class="road-intro">Camera views do not establish road safety. Check CDOT for current closures, restrictions, and surface conditions before you leave.</p>
+            <ol class="corridor-list">
+              <li><span class="corridor-mile">01</span><span>Floyd Hill <small>US 6 · Idaho Springs approach</small></span><span class="corridor-tick" aria-hidden="true"></span></li>
+              <li><span class="corridor-mile">02</span><span>Georgetown <small>Silver Plume · tunnel approach</small></span><span class="corridor-tick" aria-hidden="true"></span></li>
+              <li><span class="corridor-mile">03</span><span>Eisenhower–Johnson Tunnel <small>Continental Divide</small></span><span class="corridor-tick" aria-hidden="true"></span></li>
+              <li><span class="corridor-mile">04</span><span>Silverthorne <small>Dillon · Frisco approaches</small></span><span class="corridor-tick" aria-hidden="true"></span></li>
+              <li><span class="corridor-mile">05</span><span>Vail Pass <small>Dowd Junction · Vail Valley</small></span><span class="corridor-tick" aria-hidden="true"></span></li>
+              <li><span class="corridor-mile">06</span><span>Glenwood Canyon <small>Colorado River corridor</small></span><span class="corridor-tick" aria-hidden="true"></span></li>
+            </ol>
+            <a class="road-cta" href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">OPEN LIVE ROAD CONDITIONS <span>↗</span></a>
+            <div class="alt-route"><span>ALTERNATIVE ROUTES</span><a href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">Loveland Pass / US-6 <span>↗</span></a><a href="https://www.cotrip.org/" target="_blank" rel="noopener noreferrer">US-285 <span>↗</span></a></div>
+          </aside>
+        </section>
+      </main>
+
+      <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>POWDER<span class="brand-light">LINE</span></span></a><span>COLORADO MOUNTAIN INTELLIGENCE</span><span>CAMERAS ARE VISUAL OBSERVATIONS · CHECK OFFICIAL SOURCES FOR CONDITIONS</span></footer>
+    </div>
+    <script src="./camera-catalog.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

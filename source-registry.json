@@ -1,0 +1,49 @@
+{
+  "catalogReviewedAt": "2026-10-14",
+  "note": "Camera entries mirror the live camera listings on each resort's official camera page. Listing does not guarantee that a feed is currently broadcasting. Brownrice is the embed provider for the video cameras; Keystone's snow stake is a still image.",
+  "cameras": [
+    { "resort": "Vail", "cameraName": "Sun Up Bowl Overlook", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/vailch11", "sourcePage": "https://www.vail.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Vail", "cameraName": "The Back Bowls", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/vailch21", "sourcePage": "https://www.vail.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Vail", "cameraName": "Gore Range", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/vailch2", "sourcePage": "https://www.vail.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Vail", "cameraName": "Eagle's Nest", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/vaileaglesnest", "sourcePage": "https://www.vail.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Vail", "cameraName": "Snow Stake Summit", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/vailsnowsummit", "sourcePage": "https://www.vail.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+
+    { "resort": "Beaver Creek", "cameraName": "Snow Stake", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bcsnowstake2", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Beaver Creek", "cameraName": "Spruce", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bcspruce", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Beaver Creek", "cameraName": "Red Buffalo", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bcredbuffalo", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Beaver Creek", "cameraName": "McCoy Park", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bcmccoy", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Beaver Creek", "cameraName": "Talons Restaurant", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bctalons", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Beaver Creek", "cameraName": "Arrowhead Village", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bcahoutsidebar", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Beaver Creek", "cameraName": "Village Cam", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bcvillage", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Beaver Creek", "cameraName": "Village Ice Rink", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/bcvillageicerink", "sourcePage": "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+
+    { "resort": "Breckenridge", "cameraName": "Snow Stake · Time-lapse", "provider": "Timecam", "directUrl": "https://timecam.tv/view_cam_embed.aspx?C=704bajekd613", "sourcePage": "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx", "note": "The official camera listing's player returned 502 during review; included because the resort still lists it." },
+    { "resort": "Breckenridge", "cameraName": "Peak 9", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/breckenridge10", "sourcePage": "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Breckenridge", "cameraName": "Peak 8 view from Peak 9", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/breckenridge9", "sourcePage": "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Breckenridge", "cameraName": "Peak 7", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/breckenridge7", "sourcePage": "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+
+    { "resort": "Keystone", "cameraName": "North Peak Snow Stake", "provider": "Snow.com image", "directUrl": "https://cache.snow.com/Mtncams/KeySnowStake.jpg", "sourcePage": "https://www.keystoneresort.com/the-mountain/mountain-conditions/mountain-cams.aspx", "refreshInterval": "5 minutes", "elevationFt": 11237 },
+    { "resort": "Keystone", "cameraName": "Dercum Mountain", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/keystonedercum", "sourcePage": "https://www.keystoneresort.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Keystone", "cameraName": "North Peak", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/keystonenorthpeak", "sourcePage": "https://www.keystoneresort.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Keystone", "cameraName": "Bergman Bowl", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/keystonebergman", "sourcePage": "https://www.keystoneresort.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Keystone", "cameraName": "River Run", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/keystoneriverrun", "sourcePage": "https://www.keystoneresort.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Keystone", "cameraName": "Lakeside", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/keystonelakeside", "sourcePage": "https://www.keystoneresort.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+
+    { "resort": "Crested Butte", "cameraName": "Base Cam", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/Crestedbuttebase", "sourcePage": "https://www.skicb.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Crested Butte", "cameraName": "Umbrella Bar at Ten Peaks", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/Crestedbuttebar", "sourcePage": "https://www.skicb.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
+    { "resort": "Crested Butte", "cameraName": "Paradise Warming House", "provider": "Brownrice", "directUrl": "https://player.brownrice.com/embed/Crestedbuttewarm", "sourcePage": "https://www.skicb.com/the-mountain/mountain-conditions/mountain-cams.aspx" }
+  ],
+  "roadSources": [
+    {
+      "locationGroup": "Colorado highways / I-70 mountain corridor",
+      "sourceOrganization": "Colorado Department of Transportation",
+      "originalPageUrl": "https://www.cotrip.org/",
+      "directUrl": null,
+      "embeddingMethod": "Official COtrip link",
+      "refreshInterval": "CDOT feed listing states expected 15-minute update frequency; camera-specific cadence varies",
+      "attribution": "Colorado Department of Transportation",
+      "availability": "Official COtrip page available; individual corridor camera inventory and feed reuse terms not validated",
+      "limitations": ["No road camera is embedded until it has been individually verified", "Camera images alone do not establish road safety"]
+    }
+  ]
+}
