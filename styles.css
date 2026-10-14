@@ -244,7 +244,8 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
   .camera-source { font-size: 11px; line-height: 1.35; }
   .camera-source a { display: inline-block; min-height: 32px; padding: 6px 0; font-size: 11px; }
   .camera-footnote { margin: 12px 0 0; font-size: 11px; line-height: 1.5; }
-  .lower-grid { grid-template-columns: 1fr; gap: 25px; padding: 24px 0; }
+  .lower-grid { grid-template-columns: minmax(0, 1fr); gap: 25px; padding: 24px 0; }
+  .report-section, .road-section { min-width: 0; }
   .compact-heading { flex-direction: row; align-items: center; }
   .report-tag { font-size: 9px; padding: 7px 8px; }
   .road-section { padding: 15px; }
