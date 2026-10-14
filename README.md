@@ -16,10 +16,10 @@ Then open `http://localhost:4173`.
 
 The app is plain HTML, CSS, and JavaScript, with relative asset paths so it works at a repository subpath such as `https://ACCOUNT.github.io/REPOSITORY/`.
 
-1. Push the project files to the repository's `main` branch.
-2. In the repository, open **Settings → Pages**.
-3. Under **Build and deployment**, select **Deploy from a branch**, then choose `main` and `/ (root)`.
-4. After Pages publishes the site, enable **Enforce HTTPS** in the same settings area.
+1. In the repository, open **Settings → Pages**.
+2. Under **Build and deployment**, select **GitHub Actions** as the source.
+3. Push changes to `main`; `.github/workflows/pages.yml` publishes the static site automatically.
+4. After the first successful deployment, enable **Enforce HTTPS** in the same settings area if it is not already on.
 
 ## Camera loading and privacy
 
