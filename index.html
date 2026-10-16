@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#101b1b" />
     <meta name="description" content="A live field view of Colorado mountain cameras, snow reports, and I-70 travel conditions." />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://cache.snow.com; frame-src https://player.brownrice.com https://timecam.tv; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://cache.snow.com https://dirigo-resorts-f4e2bde5azc2cne6.z02.azurefd.net https://watch.hdrelay.io https://img.hdrelay.com https://manage.hdrelay.com https://cams.skiloveland.com; frame-src https://player.brownrice.com https://timecam.tv https://camstreamer.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <title>POWDERLINE — Colorado mountain intelligence</title>
-    <link rel="stylesheet" href="./styles.css?v=mobile-4" />
+    <link rel="stylesheet" href="./styles.css?v=region-1" />
   </head>
   <body>
     <div class="app-shell">
@@ -45,7 +45,7 @@
           <div class="brief-content">
             <h1 id="brief-title">See the mountain.<br /><span>Read the day.</span></h1>
             <div class="brief-copy">
-              <p class="brief-lead">Twenty-six resort cameras across five Colorado resorts. Direct views from the official sources. No invented snow totals.</p>
+              <p class="brief-lead" id="brief-lead">Resort cameras across Colorado. Direct views from the official sources. No invented snow totals.</p>
               <p class="brief-detail">Resort snowfall and operations reports are not connected yet. Use the official mountain reports below for current measurements; camera views are direct source embeds.</p>
               <div class="brief-stamps"><span><b class="stamp-icon">◉</b> LIVE CAMS VERIFY AT SOURCE</span><span><b class="stamp-icon muted">≋</b> SNOW REPORTS NOT CONNECTED</span></div>
             </div>
@@ -54,7 +54,7 @@
 
         <section class="camera-section" id="mountain-wall" aria-labelledby="camera-title">
           <div class="section-heading">
-            <div class="heading-left"><span class="section-index">02</span><div><div class="eyebrow">26 CAMERAS · 5 COLORADO RESORTS</div><h2 id="camera-title">Mountain camera wall</h2></div></div>
+            <div class="heading-left"><span class="section-index">02</span><div><div class="eyebrow" id="camera-summary">COLORADO CAMERAS</div><h2 id="camera-title">Mountain camera wall</h2></div></div>
             <div class="camera-tools">
               <label class="sr-only" for="resort-filter">Show cameras for resort</label>
               <select class="resort-select" id="resort-filter" aria-label="Show cameras for resort"></select>
@@ -63,20 +63,24 @@
           </div>
 
           <div class="camera-wall" id="camera-wall" aria-live="polite"></div>
-          <p class="camera-footnote"><span>CAMERA NOTE</span> Video players come directly from each resort. Browsers block this page from checking whether a cross-origin video is playing. Keystone’s snow-stake image refreshes every five minutes. Local file previews use direct-player cards; hosted embeds may require the site domain to be approved by the camera provider.</p>
+          <p class="camera-footnote"><span>CAMERA NOTE</span> Video players load when you select a camera. Still images refresh on this page every five minutes and disappear if their image request fails. A player can still be unavailable at its source; use its resort link if needed. Eldora’s official cameras are offline for scheduled maintenance, so they are not listed yet.</p>
         </section>
 
         <section class="lower-grid" id="resort-report">
           <div class="report-section">
-            <div class="section-heading compact-heading"><div class="heading-left"><span class="section-index">03</span><div><div class="eyebrow">FIVE RESORTS · MEASUREMENTS</div><h2>Resort report</h2></div></div><span class="report-tag">NO LIVE DATA FEED</span></div>
+            <div class="section-heading compact-heading"><div class="heading-left"><span class="section-index">03</span><div><div class="eyebrow" id="report-summary">RESORT MEASUREMENTS</div><h2>Resort report</h2></div></div><span class="report-tag">NO LIVE DATA FEED</span></div>
             <div class="table-wrap">
               <table>
                 <thead><tr><th>RESORT</th><th>24 H</th><th>48 H</th><th>7 DAY</th><th>REPORT</th></tr></thead>
                 <tbody>
+                  <tr><th scope="row">Arapahoe Basin</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.arapahoebasin.com/snow-report/" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Keystone</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.keystoneresort.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Breckenridge</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.breckenridge.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Copper Mountain</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.coppercolorado.com/the-mountain/conditions-weather/snow-report/" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
                   <tr><th scope="row">Vail</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.vail.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
                   <tr><th scope="row">Beaver Creek</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.beavercreek.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Breckenridge</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.breckenridge.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Keystone</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.keystoneresort.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Loveland</th><td>—</td><td>—</td><td>—</td><td><a href="https://skiloveland.com/snow-report/" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
+                  <tr><th scope="row">Winter Park</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.winterparkresort.com/the-mountain/mountain-report" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
                   <tr><th scope="row">Crested Butte</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.skicb.com/the-mountain/mountain-conditions/weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
                 </tbody>
               </table>
@@ -136,7 +140,7 @@
 
       <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>POWDER<span class="brand-light">LINE</span></span></a><span>COLORADO MOUNTAIN INTELLIGENCE</span><span>CAMERAS ARE VISUAL OBSERVATIONS · CHECK OFFICIAL SOURCES FOR CONDITIONS</span></footer>
     </div>
-    <script src="./camera-catalog.js"></script>
-    <script src="./app.js?v=mobile-2"></script>
+    <script src="./camera-catalog.js?v=region-1"></script>
+    <script src="./app.js?v=region-1"></script>
   </body>
 </html>

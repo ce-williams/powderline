@@ -1,8 +1,20 @@
 const cameraCatalog = window.powderlineCameraCatalog || [];
+const regions = [
+  { name: "Summit County", resorts: ["Arapahoe Basin", "Keystone", "Breckenridge", "Copper Mountain"] },
+  { name: "Eagle County", resorts: ["Vail", "Beaver Creek"] },
+  { name: "Clear Creek County", resorts: ["Loveland"] },
+  { name: "Grand County", resorts: ["Winter Park"] },
+  { name: "Gunnison County", resorts: ["Crested Butte"] },
+];
+const resortOrder = regions.flatMap((region) => region.resorts);
+const orderedCameras = [...cameraCatalog].sort((a, b) => {
+  return resortOrder.indexOf(a.resort) - resortOrder.indexOf(b.resort);
+});
 const cameraWall = document.querySelector("#camera-wall");
 const resortFilter = document.querySelector("#resort-filter");
 const cameraOnlyButton = document.querySelector("#camera-only");
 const cameraCards = [];
+const cameraRegions = new Map();
 let activeResort = "all";
 
 const clockFmt = new Intl.DateTimeFormat("en-US", {
@@ -38,6 +50,19 @@ function makeExternalLink(url, label) {
   return link;
 }
 
+function loadPlayer(frame, camera) {
+  const player = makeElement("iframe");
+  player.title = `${camera.resort} ${camera.name} camera`;
+  player.src = camera.src;
+  player.allow = "fullscreen; picture-in-picture";
+  player.allowFullscreen = true;
+  player.referrerPolicy = "strict-origin-when-cross-origin";
+  frame.classList.remove("player-pending");
+  frame.querySelector(".player-entry")?.remove();
+  frame.prepend(player);
+  frame.querySelector(".expand-button").hidden = false;
+}
+
 function createCameraCard(camera, index) {
   const card = makeElement("article", "camera-panel");
   card.dataset.resort = camera.resort;
@@ -47,6 +72,7 @@ function createCameraCard(camera, index) {
   if (camera.provider === "image") {
     const image = makeElement("img", "live-image");
     image.src = camera.src;
+    image.dataset.source = camera.src;
     image.alt = `${camera.resort} ${camera.name} camera view`;
     image.loading = "lazy";
     image.referrerPolicy = "strict-origin-when-cross-origin";
@@ -65,20 +91,22 @@ function createCameraCard(camera, index) {
     openPlayer.className = "embed-placeholder-link";
     frame.append(message, openPlayer);
   } else {
-    const player = makeElement("iframe");
-    player.title = `${camera.resort} ${camera.name} camera`;
-    player.src = camera.src;
-    player.loading = "lazy";
-    player.allow = "autoplay; fullscreen";
-    player.allowFullscreen = true;
-    player.referrerPolicy = "strict-origin-when-cross-origin";
-    frame.append(player);
+    frame.classList.add("player-pending");
+    const entry = makeElement("div", "player-entry");
+    entry.append(makeElement("span", "player-entry-label", "LIVE PLAYER · ON REQUEST"));
+    const load = makeElement("button", "load-player", "Load camera →");
+    load.type = "button";
+    load.setAttribute("aria-label", `Load ${camera.resort} ${camera.name} camera`);
+    load.addEventListener("click", () => loadPlayer(frame, camera), { once: true });
+    entry.append(load);
+    frame.append(entry);
   }
 
   frame.append(makeElement("span", "frame-index", `CAM ${String(index + 1).padStart(2, "0")} / ${cameraCatalog.length}`));
   const expand = makeElement("button", "expand-button", "⛶");
   expand.type = "button";
   expand.setAttribute("aria-label", `Expand ${camera.resort} ${camera.name} camera`);
+  if (camera.provider !== "image") expand.hidden = true;
   frame.append(expand, makeElement("span", "frame-category", camera.kind));
   if (camera.refreshNote) frame.append(makeElement("span", "image-refresh-note", camera.refreshNote));
   card.append(frame);
@@ -99,7 +127,7 @@ function createCameraCard(camera, index) {
   if (camera.provider === "image") {
     sourceDetails.append(document.createTextNode("IMAGE CHECKED "), makeElement("time", "image-checked", "—"), document.createElement("br"));
   }
-  sourceDetails.append(makeExternalLink(camera.src, "OPEN PLAYER ↗"));
+  sourceDetails.append(makeExternalLink(camera.playerUrl || (camera.provider === "image" ? camera.source : camera.src), camera.provider === "image" ? "OPEN CAM ↗" : "OPEN PLAYER ↗"));
   sourceDetails.append(document.createElement("br"), makeExternalLink(camera.source, "RESORT CAMS ↗"));
   source.append(sourceDetails);
   caption.append(source);
@@ -109,7 +137,7 @@ function createCameraCard(camera, index) {
 
 function populateResortFilter() {
   const counts = new Map();
-  cameraCatalog.forEach((camera) => counts.set(camera.resort, (counts.get(camera.resort) || 0) + 1));
+  orderedCameras.forEach((camera) => counts.set(camera.resort, (counts.get(camera.resort) || 0) + 1));
   const allOption = makeElement("option", "", `All resorts · ${cameraCatalog.length} cameras`);
   allOption.value = "all";
   resortFilter.append(allOption);
@@ -120,13 +148,36 @@ function populateResortFilter() {
   });
 }
 
-cameraCatalog.forEach((camera, index) => {
+regions.forEach((region) => {
+  const section = makeElement("section", "camera-region");
+  section.setAttribute("aria-label", `${region.name} cameras`);
+  const heading = makeElement("div", "region-heading");
+  heading.append(makeElement("span", "region-name", region.name.toUpperCase()));
+  const grid = makeElement("div", "camera-group-grid");
+  section.append(heading, grid);
+  cameraWall.append(section);
+  cameraRegions.set(region.name, { section, grid });
+});
+
+orderedCameras.forEach((camera, index) => {
   const card = createCameraCard(camera, index);
   card.dataset.ready = "false";
   card.dataset.unavailable = "false";
   cameraCards.push(card);
-  cameraWall.append(card);
+  const region = regions.find((entry) => entry.resorts.includes(camera.resort));
+  cameraRegions.get(region.name).grid.append(card);
 });
+
+const resortCount = new Set(cameraCatalog.map((camera) => camera.resort)).size;
+document.querySelector("#camera-summary").textContent = `${cameraCatalog.length} CAMERAS · ${resortCount} COLORADO RESORTS`;
+document.querySelector("#brief-lead").textContent = `${cameraCatalog.length} resort cameras across ${resortCount} Colorado resorts. Direct views from the official sources. No invented snow totals.`;
+document.querySelector("#report-summary").textContent = `${resortCount} RESORTS · MEASUREMENTS`;
+
+function updateRegionVisibility() {
+  cameraRegions.forEach(({ section }) => {
+    section.hidden = !section.querySelector(".camera-panel:not([hidden])");
+  });
+}
 
 function paintClock() {
   const now = new Date();
@@ -135,7 +186,7 @@ function paintClock() {
 }
 
 function updateFeedCount() {
-  const eligible = cameraCards.filter((card) => activeResort === "all" || card.dataset.resort === activeResort);
+  const eligible = cameraCards.filter((card) => card.dataset.unavailable !== "true" && (activeResort === "all" || card.dataset.resort === activeResort));
   const imageReady = eligible.filter((card) => card.querySelector("img.live-image") && card.dataset.ready === "true" && card.dataset.unavailable !== "true").length;
   document.querySelector("#feed-count").textContent = `${eligible.length} CAMERAS LISTED`;
   document.querySelector("#feed-detail").textContent = window.location.protocol === "file:"
@@ -152,6 +203,7 @@ function hideUnavailable(card, reason) {
   card.hidden = true;
   card.setAttribute("aria-hidden", "true");
   card.dataset.failureReason = reason;
+  updateRegionVisibility();
   updateFeedCount();
 }
 
@@ -181,13 +233,6 @@ function prepareImage(card) {
   }
 }
 
-function prepareFrame(card) {
-  const frame = card.querySelector("iframe");
-  if (!frame) return;
-  // iframe load only confirms the frame navigation completed; cross-origin
-  // policy prevents us from verifying that video is actually playing.
-}
-
 function applyResortFilter() {
   activeResort = resortFilter.value;
   cameraCards.forEach((card) => {
@@ -195,6 +240,7 @@ function applyResortFilter() {
     card.hidden = unavailable || (activeResort !== "all" && card.dataset.resort !== activeResort);
     card.setAttribute("aria-hidden", String(card.hidden));
   });
+  updateRegionVisibility();
   updateFeedCount();
 }
 
@@ -208,13 +254,9 @@ function refreshCamera(card) {
     frame.src = frame.src;
   }
   if (image && !card.hidden) {
-    image.addEventListener("load", () => {
-      setImageCheck(card);
-      markReady(card);
-    }, { once: true });
-    image.addEventListener("error", () => hideUnavailable(card, "image refresh failed"), { once: true });
-    const base = image.src.split("?")[0];
-    image.src = `${base}?refresh=${Date.now()}`;
+    const url = new URL(image.dataset.source);
+    url.searchParams.set("refresh", Date.now());
+    image.src = url.href;
   }
   updateFeedCount();
 }
@@ -222,7 +264,6 @@ function refreshCamera(card) {
 populateResortFilter();
 cameraCards.forEach((card) => {
   prepareImage(card);
-  prepareFrame(card);
 });
 resortFilter.addEventListener("change", applyResortFilter);
 
@@ -263,7 +304,6 @@ document.querySelector("#refresh-all").addEventListener("click", (event) => {
 paintClock();
 window.setInterval(paintClock, 15000);
 window.setInterval(() => {
-  const keystoneStake = document.querySelector('[data-camera-id="keystone-snow-stake"]');
-  if (keystoneStake && !keystoneStake.hidden && keystoneStake.dataset.unavailable !== "true") refreshCamera(keystoneStake);
+  cameraCards.filter((card) => card.querySelector("img.live-image") && !card.hidden && card.dataset.unavailable !== "true").forEach(refreshCamera);
 }, 5 * 60 * 1000);
 updateFeedCount();
