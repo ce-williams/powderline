@@ -203,8 +203,8 @@ function updateFeedCount() {
   document.querySelector("#feed-detail").textContent = window.location.protocol === "file:"
     ? "Local preview · use hosted page for embeds"
     : imageReady > 0
-      ? `${imageReady} still image${imageReady === 1 ? "" : "s"} checked · Video at source`
-      : "Video playback varies by resort";
+      ? `${imageReady} camera image${imageReady === 1 ? "" : "s"} loaded · Video on request`
+      : "Camera images loading";
 }
 
 function hideUnavailable(card, reason) {
