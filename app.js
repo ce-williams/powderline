@@ -3,7 +3,6 @@ const regions = [
   { name: "Summit County", resorts: ["Arapahoe Basin", "Keystone", "Breckenridge", "Copper Mountain"] },
   { name: "Eagle County", resorts: ["Vail", "Beaver Creek"] },
   { name: "Clear Creek County", resorts: ["Loveland"] },
-  { name: "Grand County", resorts: ["Winter Park"] },
   { name: "Gunnison County", resorts: ["Crested Butte"] },
 ];
 const resortOrder = regions.flatMap((region) => region.resorts);

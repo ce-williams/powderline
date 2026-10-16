@@ -47,9 +47,4 @@ window.powderlineCameraCatalog = [
   { id: "loveland-chets", resort: "Loveland", name: "Chet's Dream Top", kind: "MOUNTAIN VIEW", provider: "image", src: "https://cams.skiloveland.com/lsacams/chetstop/chetstop.jpg", source: "https://skiloveland.com/webcams/", refreshNote: "STILL · SOURCE REFRESH" },
   { id: "loveland-valley", resort: "Loveland", name: "Valley Deck", kind: "BASE AREA", provider: "image", src: "https://cams.skiloveland.com/lsacams/valleydeck/valleydeck.jpg", source: "https://skiloveland.com/webcams/", refreshNote: "STILL · SOURCE REFRESH" },
 
-  { id: "winter-park-stake", resort: "Winter Park", name: "Snow Stake", kind: "SNOW STAKE", provider: "camstreamer", src: "https://camstreamer.com/embed/mXhcYGDptt4PPiSEJVwxPNmUZjj1CNAjSkrBdj3s", source: "https://www.winterparkresort.com/the-mountain/mountain-cams" },
-  { id: "winter-park-base", resort: "Winter Park", name: "Base Cam", kind: "BASE AREA", provider: "camstreamer", src: "https://camstreamer.com/embed/c909b9be0f94f0d/S-50783", source: "https://www.winterparkresort.com/the-mountain/mountain-cams" },
-  { id: "winter-park-lunch-rock", resort: "Winter Park", name: "Lunch Rock", kind: "MOUNTAIN VIEW", provider: "camstreamer", src: "https://camstreamer.com/embed/FkuQtJjEJaLOpalZiTsiVrZUw5IG3fCjMS3Vcc8h", source: "https://www.winterparkresort.com/the-mountain/mountain-cams" },
-  { id: "winter-park-snoasis", resort: "Winter Park", name: "Snoasis", kind: "MID-MOUNTAIN", provider: "camstreamer", src: "https://camstreamer.com/embed/e6H5OSc0NDBQR7KCR0zZnKCV0qqX1YF1b8egwy8x", source: "https://www.winterparkresort.com/the-mountain/mountain-cams" },
-  { id: "winter-park-tubing", resort: "Winter Park", name: "Tubing Hill", kind: "BASE AREA", provider: "camstreamer", src: "https://camstreamer.com/embed/8v334V7UDYwodQScLzh63Y6BaqoAQNmj5qhEjsjF", source: "https://www.winterparkresort.com/the-mountain/mountain-cams" },
 ];
