@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#101b1b" />
     <meta name="description" content="A live field view of Colorado mountain cameras, snow reports, and I-70 travel conditions." />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://cache.snow.com https://dirigo-resorts-f4e2bde5azc2cne6.z02.azurefd.net https://watch.hdrelay.io https://img.hdrelay.com https://manage.hdrelay.com https://cams.skiloveland.com; frame-src https://player.brownrice.com https://timecam.tv; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://*.brownrice.com https://cache.snow.com https://dirigo-resorts-f4e2bde5azc2cne6.z02.azurefd.net https://watch.hdrelay.io https://img.hdrelay.com https://manage.hdrelay.com https://cams.skiloveland.com; frame-src https://player.brownrice.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <title>POWDERLINE — Colorado mountain intelligence</title>
     <link rel="stylesheet" href="./styles.css?v=region-2" />
   </head>
@@ -63,7 +63,7 @@
           </div>
 
           <div class="camera-wall" id="camera-wall" aria-live="polite"></div>
-          <p class="camera-footnote"><span>CAMERA NOTE</span> Video players load when you select a camera. Still images refresh here every five minutes and disappear if their image request fails. <a href="https://www.winterparkresort.com/the-mountain/mountain-cams" target="_blank" rel="noopener noreferrer">Winter Park’s cameras ↗</a> block offsite embeds; <a href="https://www.eldora.com/the-mountain/current-conditions/webcams/" target="_blank" rel="noopener noreferrer">Eldora’s cameras ↗</a> are offline for maintenance.</p>
+          <p class="camera-footnote"><span>CAMERA NOTE</span> The wall shows each source’s latest available image. Video players load when you select a camera; you can return to the image if playback fails. Images refresh every five minutes, with the last successful image kept if a refresh fails. <a href="https://www.winterparkresort.com/the-mountain/mountain-cams" target="_blank" rel="noopener noreferrer">Winter Park’s cameras ↗</a> block offsite embeds; <a href="https://www.eldora.com/the-mountain/current-conditions/webcams/" target="_blank" rel="noopener noreferrer">Eldora’s cameras ↗</a> are offline for maintenance.</p>
         </section>
 
         <section class="lower-grid" id="resort-report">

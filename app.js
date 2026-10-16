@@ -56,9 +56,18 @@ function loadPlayer(frame, camera) {
   player.allow = "fullscreen; picture-in-picture";
   player.allowFullscreen = true;
   player.referrerPolicy = "strict-origin-when-cross-origin";
+  player.addEventListener("load", () => frame.classList.add("player-loaded"), { once: true });
   frame.classList.remove("player-pending");
   frame.querySelector(".player-entry")?.remove();
   frame.prepend(player);
+  const stillButton = makeElement("button", "show-still-button", "Show last image");
+  stillButton.type = "button";
+  stillButton.addEventListener("click", () => {
+    const showStill = frame.classList.toggle("show-still");
+    stillButton.textContent = showStill ? "Resume player" : "Show last image";
+    stillButton.setAttribute("aria-pressed", String(showStill));
+  });
+  frame.append(stillButton);
   frame.querySelector(".expand-button").hidden = false;
 }
 
@@ -67,15 +76,18 @@ function createCameraCard(camera, index) {
   card.dataset.resort = camera.resort;
   card.dataset.cameraId = camera.id;
 
-  const frame = makeElement("div", `camera-frame${camera.provider === "image" ? " image-frame" : ""}`);
-  if (camera.provider === "image") {
+  const frame = makeElement("div", `camera-frame${camera.provider === "image" ? " image-frame" : " preview-frame"}`);
+  if (camera.provider === "image" || camera.previewSrc) {
     const image = makeElement("img", "live-image");
-    image.src = camera.src;
-    image.dataset.source = camera.src;
-    image.alt = `${camera.resort} ${camera.name} camera view`;
+    image.src = camera.previewSrc || camera.src;
+    image.dataset.source = image.src;
+    image.alt = `${camera.resort} ${camera.name} latest available camera image`;
     image.loading = "lazy";
     image.referrerPolicy = "strict-origin-when-cross-origin";
     frame.append(image);
+  }
+  if (camera.provider === "image") {
+    // The latest still is the camera view; no video player is needed.
   } else if (window.location.protocol === "file:") {
     // A file:// page has an opaque origin. Many camera providers reject its
     // embedded player even when the same URL works as a top-level page.
@@ -92,8 +104,8 @@ function createCameraCard(camera, index) {
   } else {
     frame.classList.add("player-pending");
     const entry = makeElement("div", "player-entry");
-    entry.append(makeElement("span", "player-entry-label", "LIVE PLAYER · ON REQUEST"));
-    const load = makeElement("button", "load-player", "Load camera →");
+    entry.append(makeElement("span", "player-entry-label", "LATEST CAMERA IMAGE"));
+    const load = makeElement("button", "load-player", "Play live video →");
     load.type = "button";
     load.setAttribute("aria-label", `Load ${camera.resort} ${camera.name} camera`);
     load.addEventListener("click", () => loadPlayer(frame, camera), { once: true });
@@ -123,7 +135,7 @@ function createCameraCard(camera, index) {
   const source = makeElement("div", "camera-source");
   source.append(makeElement("span", "source-dot"));
   const sourceDetails = makeElement("span");
-  if (camera.provider === "image") {
+  if (camera.provider === "image" || camera.previewSrc) {
     sourceDetails.append(document.createTextNode("IMAGE CHECKED "), makeElement("time", "image-checked", "—"), document.createElement("br"));
   }
   sourceDetails.append(makeExternalLink(camera.playerUrl || (camera.provider === "image" ? camera.source : camera.src), camera.provider === "image" ? "OPEN CAM ↗" : "OPEN PLAYER ↗"));
@@ -244,9 +256,6 @@ function applyResortFilter() {
 }
 
 function refreshCamera(card) {
-  card.dataset.unavailable = "false";
-  card.dataset.ready = "false";
-  card.querySelectorAll(".source-dot").forEach((dot) => dot.classList.remove("is-ready"));
   const frame = card.querySelector("iframe");
   const image = card.querySelector("img.live-image");
   if (frame && !card.hidden) {
@@ -255,7 +264,15 @@ function refreshCamera(card) {
   if (image && !card.hidden) {
     const url = new URL(image.dataset.source);
     url.searchParams.set("refresh", Date.now());
-    image.src = url.href;
+    const nextImage = new Image();
+    nextImage.referrerPolicy = "strict-origin-when-cross-origin";
+    nextImage.onload = () => {
+      image.src = url.href;
+      setImageCheck(card);
+      markReady(card);
+    };
+    // If a fresh request fails, keep the last image that loaded successfully.
+    nextImage.src = url.href;
   }
   updateFeedCount();
 }

@@ -106,13 +106,16 @@ h2 { color: var(--paper); font: 600 27px/.98 var(--display); letter-spacing: .01
 .camera-panel[hidden] { display: none; }
 .camera-frame { position: relative; aspect-ratio: 16 / 9; background: #0b1314; overflow: hidden; }
 .camera-frame iframe, .camera-frame img { border: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
-.camera-frame iframe { position: absolute; inset: 0; }
-.camera-frame.image-frame img { position: absolute; inset: 0; }
-.player-pending { display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse at 70% 0, rgba(80, 133, 126, .18), transparent 65%), #101d1d; }
-.player-entry { display: grid; justify-items: center; gap: 13px; padding: 20px; }
-.player-entry-label { color: var(--quiet); font: 8px var(--mono); letter-spacing: .12em; }
-.load-player { min-height: 40px; border: 1px solid var(--ice-deep); background: rgba(139, 216, 207, .07); color: var(--ice); padding: 9px 15px; font: 11px var(--mono); letter-spacing: .02em; }
+.camera-frame iframe { position: absolute; inset: 0; z-index: 1; opacity: 0; }
+.camera-frame.player-loaded:not(.show-still) iframe { opacity: 1; }
+.camera-frame.image-frame img, .camera-frame.preview-frame img { position: absolute; inset: 0; }
+.player-pending { background: #101d1d; }
+.player-entry { position: absolute; z-index: 2; right: 10px; bottom: 10px; display: grid; justify-items: end; gap: 5px; }
+.player-entry-label { color: white; background: rgba(8, 15, 16, .78); padding: 5px 7px; font: 8px var(--mono); letter-spacing: .12em; }
+.load-player { min-height: 34px; border: 1px solid var(--ice-deep); background: rgba(8, 15, 16, .9); color: var(--ice); padding: 7px 10px; font: 10px var(--mono); letter-spacing: .02em; }
 .load-player:hover { border-color: var(--ice); background: rgba(139, 216, 207, .14); }
+.show-still-button { position: absolute; z-index: 3; right: 8px; bottom: 8px; min-height: 28px; border: 1px solid var(--ice-deep); background: rgba(8, 15, 16, .9); color: var(--ice); padding: 5px 8px; font: 9px var(--mono); }
+.show-still-button:hover { border-color: var(--ice); }
 .embed-placeholder { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 13px; padding: 20px; background: radial-gradient(ellipse at 85% 5%, rgba(71, 116, 109, .25), transparent 48%), #101d1d; }
 .embed-placeholder-copy { display: grid; gap: 7px; max-width: 320px; }
 .embed-placeholder-copy strong { color: var(--paper); font: 500 19px/1.1 var(--display); }

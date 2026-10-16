@@ -14,7 +14,6 @@ window.powderlineCameraCatalog = [
   { id: "beaver-creek-village", resort: "Beaver Creek", name: "Village Cam", kind: "VILLAGE VIEW", provider: "brownrice", src: "https://player.brownrice.com/embed/bcvillage", source: "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
   { id: "beaver-creek-ice-rink", resort: "Beaver Creek", name: "Village Ice Rink", kind: "VILLAGE VIEW", provider: "brownrice", src: "https://player.brownrice.com/embed/bcvillageicerink", source: "https://www.beavercreek.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
 
-  { id: "breckenridge-snow-stake", resort: "Breckenridge", name: "Snow Stake · Time-lapse", kind: "SNOW STAKE · TIME-LAPSE", provider: "timecam", src: "https://timecam.tv/view_cam_embed.aspx?C=704bajekd613", source: "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
   { id: "breckenridge-peak-9", resort: "Breckenridge", name: "Peak 9", kind: "MOUNTAIN VIEW", provider: "brownrice", src: "https://player.brownrice.com/embed/breckenridge10", source: "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
   { id: "breckenridge-peak-8", resort: "Breckenridge", name: "Peak 8 view from Peak 9", kind: "MOUNTAIN VIEW", provider: "brownrice", src: "https://player.brownrice.com/embed/breckenridge9", source: "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
   { id: "breckenridge-peak-7", resort: "Breckenridge", name: "Peak 7", kind: "MOUNTAIN VIEW", provider: "brownrice", src: "https://player.brownrice.com/embed/breckenridge7", source: "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx" },
@@ -48,3 +47,26 @@ window.powderlineCameraCatalog = [
   { id: "loveland-valley", resort: "Loveland", name: "Valley Deck", kind: "BASE AREA", provider: "image", src: "https://cams.skiloveland.com/lsacams/valleydeck/valleydeck.jpg", source: "https://skiloveland.com/webcams/", refreshNote: "STILL · SOURCE REFRESH" },
 
 ];
+
+// These are the poster JPEGs exposed by the corresponding Brownrice players.
+// Keep the exact host because cameras are assigned to different Brownrice servers.
+const brownricePosterHosts = {
+  "vail-sun-up-bowl": "live9", "vail-back-bowls": "live9", "vail-gore-range": "streamer9",
+  "vail-eagles-nest": "live9", "vail-snow-stake": "live9",
+  "beaver-creek-snow-stake": "streamer5", "beaver-creek-spruce": "streamer7",
+  "beaver-creek-red-buffalo": "streamer7", "beaver-creek-mccoy-park": "streamer2",
+  "beaver-creek-talons": "streamer7", "beaver-creek-arrowhead": "streamer7",
+  "beaver-creek-village": "streamer7", "beaver-creek-ice-rink": "streamer5",
+  "breckenridge-peak-9": "streamer9", "breckenridge-peak-8": "live9",
+  "breckenridge-peak-7": "streamer8",
+  "keystone-dercum": "live9", "keystone-north-peak": "live9",
+  "keystone-bergman": "live8p", "keystone-river-run": "live9", "keystone-lakeside": "live9",
+  "crested-butte-base": "live6", "crested-butte-umbrella-bar": "live9",
+  "crested-butte-paradise": "live9",
+};
+
+window.powderlineCameraCatalog.forEach((camera) => {
+  if (camera.provider !== "brownrice") return;
+  const streamName = camera.src.split("/").pop().toLowerCase();
+  camera.previewSrc = `https://${brownricePosterHosts[camera.id]}.brownrice.com/cam-images/${streamName}.jpg`;
+});

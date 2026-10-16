@@ -23,20 +23,19 @@ The app is plain HTML, CSS, and JavaScript, with relative asset paths so it work
 
 ## Camera loading and privacy
 
-- The camera catalog includes every camera listed on the five resorts' official camera pages as of the review date. Use the resort selector to narrow the wall.
-- Video players are loaded as camera tiles approach the viewport, avoiding a burst of 25 simultaneous video embeds. Open the player or resort page from the tile caption if the embed is blank.
-- A slow iframe is left visible rather than being removed after a fixed timeout. The embedded player reports its own stream state; the parent page does not claim to verify cross-origin video playback.
-- Keystone's official still image is checked by the browser and removed if its image request fails. It is refreshed on the source's five-minute cadence.
-- A Content Security Policy in `index.html` limits scripts and styles to this site, frames to Brownrice and the Breckenridge time-lapse host, and the Keystone image to its source host. External fonts are not requested.
+- The camera catalog covers eight Colorado resorts. Use the resort selector to narrow the wall.
+- Brownrice video cameras show the latest poster JPEG exposed by their player. Video iframes load only when selected, and the viewer can return to the still image if playback fails. The browser checks that each image loads before showing its camera card.
+- Still images refresh every five minutes. A failed refresh keeps the last image that loaded successfully during the current visit. A first-load failure hides the camera card.
+- The Breckenridge snow stake time-lapse is omitted while its provider has an invalid HTTPS certificate.
+- A Content Security Policy in `index.html` limits scripts and styles to this site, frames to Brownrice, and images to the listed camera hosts. External fonts are not requested.
 - External links that open a new tab use `noopener noreferrer`.
 
 ## Source integrity
 
-- The camera wall embeds every currently listed resort camera directly. Resort-page and direct-player links are provided as fallbacks.
-- An explicit iframe request error or a failed image request removes that camera tile. A slow iframe is not hidden just because its load event was delayed.
+- The camera wall links each listed view to its player and resort page. Cross-origin video playback cannot be verified by the parent page.
 - `camera-catalog.js` provides the runtime camera list; `source-registry.json` records the same official camera URLs and any known source limitations.
 - The catalog review date is not a promise that a camera will stay available. Provider streams can go offline later.
-- Keystone documents a five-minute refresh for its still-image snow stake. The app re-fetches it on that cadence and hides it if the image request fails.
+- The app refreshes visible stills and Brownrice posters on a five-minute cadence without replacing a successfully loaded image when a new request fails.
 - Resort snowfall, depth, weather, terrain, and lift totals are intentionally blank until a timestamped source adapter is implemented. No demo or inferred conditions are included.
 - Road conditions are linked to COtrip. No road safety state is inferred from camera imagery.
 
