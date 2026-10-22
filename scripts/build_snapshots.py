@@ -19,6 +19,7 @@ from PIL import Image, ImageOps
 SITE_URL = "https://ce-williams.github.io/powderline/"
 MAX_BYTES = 8 * 1024 * 1024
 Image.MAX_IMAGE_PIXELS = 30_000_000
+REJECTED_IMAGES = json.loads(Path(__file__).with_name("rejected-images.json").read_text())
 
 
 def now():
@@ -48,6 +49,11 @@ def normalize_image(body):
         if image.width < 160 or image.height < 90:
             raise ValueError("Response is too small to be a camera view")
         image = ImageOps.exif_transpose(image).convert("RGB")
+        sample = image.convert("L").resize((32, 18)).tobytes()
+        for rejected in REJECTED_IMAGES:
+            reference = bytes.fromhex(rejected["sample"])
+            if sum(abs(a - b) for a, b in zip(sample, reference)) / len(sample) < 1.5:
+                raise ValueError("Provider status graphic: " + rejected["name"])
         image.thumbnail((960, 720))
         output = BytesIO()
         image.save(output, format="JPEG", quality=82, optimize=True)

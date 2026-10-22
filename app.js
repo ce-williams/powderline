@@ -50,28 +50,6 @@ function makeExternalLink(url, label) {
   return link;
 }
 
-function loadPlayer(frame, camera) {
-  const player = makeElement("iframe");
-  player.title = `${camera.resort} ${camera.name} camera`;
-  player.src = camera.src;
-  player.allow = "fullscreen; picture-in-picture";
-  player.allowFullscreen = true;
-  player.referrerPolicy = "strict-origin-when-cross-origin";
-  player.addEventListener("load", () => frame.classList.add("player-loaded"), { once: true });
-  frame.classList.remove("player-pending");
-  frame.querySelector(".player-entry")?.remove();
-  frame.prepend(player);
-  const stillButton = makeElement("button", "show-still-button", "Show last image");
-  stillButton.type = "button";
-  stillButton.addEventListener("click", () => {
-    const showStill = frame.classList.toggle("show-still");
-    stillButton.textContent = showStill ? "Resume player" : "Show last image";
-    stillButton.setAttribute("aria-pressed", String(showStill));
-  });
-  if (frame.querySelector("img.live-image")) frame.append(stillButton);
-  frame.querySelector(".expand-button").hidden = false;
-}
-
 function createCameraCard(camera, index) {
   const card = makeElement("article", "camera-panel");
   card.dataset.resort = camera.resort;
@@ -81,51 +59,22 @@ function createCameraCard(camera, index) {
 
   const snapshot = cachedSnapshot(camera.id);
   const frame = makeElement("div", `camera-frame${camera.provider === "image" ? " image-frame" : " preview-frame"}`);
-  if (snapshot || camera.provider === "image" || camera.previewSrc) {
+  // Public snapshots are the in-page view. Third-party playback may fail even
+  // when the iframe fires load, so it must never replace a usable image.
+  if (snapshot) {
     const image = makeElement("img", "live-image");
-    const remoteSource = camera.previewSrc || (camera.provider === "image" ? camera.src : "");
-    image.src = snapshot ? snapshotTools.url(snapshot, document.baseURI) : remoteSource;
+    image.src = snapshotTools.url(snapshot, document.baseURI);
     image.dataset.source = image.src;
-    image.dataset.remoteSource = remoteSource;
-    if (snapshot) rememberSnapshot(card, snapshot);
+    rememberSnapshot(card, snapshot);
     image.alt = `${camera.resort} ${camera.name} latest available camera image`;
     image.loading = "lazy";
-    image.referrerPolicy = "strict-origin-when-cross-origin";
     frame.append(image);
-  }
-  if (camera.provider === "link") {
-    // Source-only cameras remain accessible without loading a blocked player.
-  } else if (camera.provider === "image") {
-    // The latest still is the camera view; no video player is needed.
-  } else if (window.location.protocol === "file:") {
-    // A file:// page has an opaque origin. Many camera providers reject its
-    // embedded player even when the same URL works as a top-level page.
-    frame.classList.add("embed-placeholder");
-    const message = makeElement("div", "embed-placeholder-copy");
-    message.append(
-      makeElement("span", "embed-placeholder-kicker", "HTTPS EMBED PREVIEW"),
-      makeElement("strong", "", "Open this camera directly"),
-      makeElement("span", "", "Camera providers may reject embeds opened from a local file.")
-    );
-    const openPlayer = makeExternalLink(camera.src, "OPEN LIVE PLAYER ↗");
-    openPlayer.className = "embed-placeholder-link";
-    frame.append(message, openPlayer);
-  } else {
-    frame.classList.add("player-pending");
-    const entry = makeElement("div", "player-entry");
-    entry.append(makeElement("span", "player-entry-label", camera.previewSrc ? "LATEST SOURCE IMAGE" : "CAMERA ON REQUEST"));
-    const load = makeElement("button", "load-player", "Load camera player →");
-    load.type = "button";
-    load.setAttribute("aria-label", `Load ${camera.resort} ${camera.name} camera`);
-    load.addEventListener("click", () => loadPlayer(frame, camera), { once: true });
-    entry.append(load);
-    frame.append(entry);
   }
 
   const fallback = makeElement("div", "camera-fallback");
-  fallback.hidden = Boolean(snapshot || camera.previewSrc || camera.provider === "image");
+  fallback.hidden = Boolean(snapshot);
   fallback.append(
-    makeElement("strong", "", camera.directory ? "Webcam not available" : "No captured image yet"),
+    makeElement("strong", "", camera.directory ? "No verified public webcam" : "Camera currently unavailable"),
     makeElement("p", "", camera.note || "This camera has not supplied a usable snapshot yet. The player or official camera source may still be available."),
     makeExternalLink(camera.playerUrl || camera.source, camera.directory ? "SKI AREA WEBSITE ↗" : "OPEN RESORT CAMERAS ↗")
   );
@@ -134,7 +83,7 @@ function createCameraCard(camera, index) {
   const expand = makeElement("button", "expand-button", "⛶");
   expand.type = "button";
   expand.setAttribute("aria-label", `Expand ${camera.resort} ${camera.name} camera`);
-  if (camera.provider !== "image" && !snapshot) expand.hidden = true;
+  if (!snapshot) expand.hidden = true;
   frame.append(expand, makeElement("span", "frame-category", camera.kind));
   if (camera.refreshNote) frame.append(makeElement("span", "image-refresh-note", camera.refreshNote));
   const badge = makeElement("span", "snapshot-badge", "CACHED · HOURLY");
@@ -156,10 +105,10 @@ function createCameraCard(camera, index) {
   source.append(makeElement("span", "source-dot"));
   const sourceDetails = makeElement("span");
   const imageStatus = makeElement("span", "image-status");
-  imageStatus.hidden = !(snapshot || camera.provider === "image" || camera.previewSrc);
+  imageStatus.hidden = !snapshot;
   imageStatus.append(makeElement("span", "image-kind", snapshot ? "CACHED IMAGE " : "IMAGE CHECKED "), makeElement("time", "image-checked", "—"), document.createElement("br"));
   sourceDetails.append(imageStatus);
-  sourceDetails.append(makeExternalLink(camera.playerUrl || (camera.provider === "image" ? camera.source : camera.src), camera.provider === "link" ? "OPEN WEBSITE ↗" : camera.provider === "image" ? "OPEN CAM ↗" : "OPEN PLAYER ↗"));
+  sourceDetails.append(makeExternalLink(camera.playerUrl || (camera.provider === "image" ? camera.source : camera.src), camera.provider === "link" ? "SOURCE WEBSITE ↗" : camera.provider === "image" ? "CAMERA SOURCE ↗" : "LIVE SOURCE ↗"));
   sourceDetails.append(document.createElement("br"), makeExternalLink(camera.source, "RESORT CAMS ↗"));
   source.append(sourceDetails);
   caption.append(source);
@@ -189,9 +138,13 @@ regions.forEach((region) => {
   const heading = makeElement("div", "region-heading");
   heading.append(makeElement("span", "region-name", region.name.toUpperCase()));
   const grid = makeElement("div", "camera-group-grid");
-  section.append(heading, grid);
+  const unavailable = makeElement("details", "unavailable-cameras");
+  const summary = makeElement("summary");
+  const unavailableGrid = makeElement("div", "camera-group-grid");
+  unavailable.append(summary, unavailableGrid);
+  section.append(heading, grid, unavailable);
   cameraWall.append(section);
-  cameraRegions.set(region.name, { section, grid });
+  cameraRegions.set(region.name, { section, grid, unavailable, unavailableGrid, summary });
 });
 
 orderedCameras.forEach((camera, index) => {
@@ -200,7 +153,8 @@ orderedCameras.forEach((camera, index) => {
   card.dataset.unavailable = "false";
   cameraCards.push(card);
   const region = regions.find((entry) => entry.resorts.includes(camera.resort));
-  cameraRegions.get(region.name).grid.append(card);
+  const target = cameraRegions.get(region.name);
+  (cachedSnapshot(camera.id) ? target.grid : target.unavailableGrid).append(card);
 });
 
 resortCatalog.filter((resort) => !cameraCatalog.some((camera) => camera.resort === resort.name)).forEach((resort) => {
@@ -211,7 +165,7 @@ resortCatalog.filter((resort) => !cameraCatalog.some((camera) => camera.resort =
     note: resort.note || "No public mountain webcam was found during the latest source review. Check the ski area’s website for updates.",
   }, 0);
   cameraCards.push(card);
-  cameraRegions.get(resort.region).grid.append(card);
+  cameraRegions.get(resort.region).unavailableGrid.append(card);
 });
 
 const resortCount = resortCatalog.length;
@@ -220,8 +174,20 @@ document.querySelector("#brief-lead").textContent = `Explore ${resortCount} Colo
 document.querySelector("#report-summary").textContent = `${document.querySelectorAll("#resort-report tbody tr").length} RESORTS · MEASUREMENTS`;
 
 function updateRegionVisibility() {
-  cameraRegions.forEach(({ section }) => {
+  cameraCards.forEach((card) => {
+    const region = regions.find((entry) => entry.resorts.includes(card.dataset.resort));
+    const target = cameraRegions.get(region.name);
+    const grid = cachedSnapshot(card.dataset.cameraId) && card.querySelector("img.live-image") ? target.grid : target.unavailableGrid;
+    if (card.parentElement !== grid) grid.append(card);
+  });
+  cameraRegions.forEach(({ section, unavailable, unavailableGrid, summary }) => {
     section.hidden = !section.querySelector(".camera-panel:not([hidden])");
+    const cards = [...unavailableGrid.querySelectorAll(".camera-panel:not([hidden])")];
+    const areas = cards.filter((card) => card.dataset.directory === "true").length;
+    const cameras = cards.length - areas;
+    unavailable.hidden = cards.length === 0;
+    summary.textContent = [cameras ? `${cameras} camera${cameras === 1 ? "" : "s"} currently unavailable` : "", areas ? `${areas} ski area${areas === 1 ? "" : "s"} without a verified feed` : ""].filter(Boolean).join(" · ");
+    unavailable.open = activeResort !== "all";
   });
 }
 
@@ -304,13 +270,7 @@ function prepareImage(card) {
     markReady(card);
   });
   image.addEventListener("error", () => {
-    if (image.dataset.remoteSource && image.dataset.remoteFallback !== "true") {
-      image.dataset.remoteFallback = "true";
-      delete card.dataset.snapshotFetchedAt;
-      card.querySelector(".snapshot-badge").hidden = true;
-      image.src = image.dataset.remoteSource;
-      image.dataset.source = image.src;
-    } else showUnavailable(card, "image request failed");
+    showUnavailable(card, "Cached image request failed; use Refresh to retry.");
   });
   if (image.complete && image.naturalWidth > 0) {
     setImageCheck(card);
@@ -365,22 +325,16 @@ function applySnapshot(card, entry) {
 function refreshCamera(card) {
   const snapshot = cachedSnapshot(card.dataset.cameraId);
   if (snapshot) return applySnapshot(card, snapshot);
-  const image = card.querySelector("img.live-image");
-  if (!image || card.hidden) return Promise.resolve();
-  return new Promise((resolve) => {
-    const url = new URL(image.dataset.source, document.baseURI);
-    url.searchParams.set("refresh", Date.now());
-    const nextImage = new Image();
-    nextImage.referrerPolicy = "strict-origin-when-cross-origin";
-    nextImage.onload = () => {
-      image.src = url.href;
-      setImageCheck(card);
-      markReady(card);
-      resolve();
-    };
-    nextImage.onerror = resolve;
-    nextImage.src = url.href;
-  });
+  if (snapshotManifest.cameras?.[card.dataset.cameraId]?.status === "unavailable") {
+    // A publisher-verified outage or rejected status graphic is not a last-good image.
+    delete card.dataset.snapshotFetchedAt;
+    card.querySelector("img.live-image")?.remove();
+    card.querySelector(".snapshot-badge").hidden = true;
+    card.querySelector(".image-status").hidden = true;
+    card.querySelector(".expand-button").hidden = true;
+    showUnavailable(card, "No usable source image");
+  }
+  return Promise.resolve();
 }
 
 async function refreshWall() {
@@ -396,10 +350,12 @@ async function refreshWall() {
     }
   } catch { /* Local previews or temporary outages keep the current images. */ }
   await Promise.allSettled(cameraCards.filter((card) => !card.hidden).map(refreshCamera));
+  updateRegionVisibility();
   updateFeedCount();
 }
 
 populateResortFilter();
+updateRegionVisibility();
 cameraCards.forEach((card) => {
   prepareImage(card);
   if (card.dataset.snapshotFetchedAt) setImageCheck(card);

@@ -50,3 +50,11 @@ Resort snowfall, depth, weather, terrain, and lift totals stay blank until a tim
 ## Current implementation boundary
 
 The front end remains static; scheduled jobs collect and publish camera snapshots. It does not include an unauthenticated capture-trigger API, automated resort-report integration, or CDOT camera/incident feed access. Unavailable providers remain explicitly labeled.
+
+### Browser QA — 2026-10-22
+
+The entire published wall was scrolled and visually inspected in Chromium: all 92 cached image requests loaded, but Monarch Pioneer Top was a scheduled-offline graphic. That graphic is now rejected both during collection and last-good retention. A regression test checks the original graphic, JPEG recompression, and a legitimate black nighttime frame.
+
+Clicking Sunlight’s in-page player reproduced an unsupported-playback error that covered a valid snapshot. The wall now displays cached images only; optional live sources open separately. No iframe load event is treated as evidence of playable video. Unavailable cameras and ski areas without verified feeds remain listed under expandable regional status sections, which open when that resort is selected.
+
+The Breckenridge snow-stake embed fails on the official resort page, Telluride’s two powder-camera frames return 404, and Steamboat marks Thunderhead down. These are labeled as unavailable rather than counted as working images. Foggy views remain valid camera images.

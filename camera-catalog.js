@@ -1,4 +1,4 @@
-// Official resort sources reviewed on 2026-10-21. A listed feed may be offline or stale.
+// Official resort sources reviewed on 2026-10-22. A listed feed may be offline or stale.
 window.powderlineResortCatalog = [
   {
     "name": "Arapahoe Basin",
@@ -206,7 +206,6 @@ window.powderlineResortCatalog = [
     "reviewedOn": "2026-10-21"
   }
 ];
-
 window.powderlineCameraCatalog = [
   {
     "id": "vail-sun-up-bowl",
@@ -705,8 +704,8 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx",
     "source": "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx",
-    "note": "Open the resort’s snow stake page. The time-lapse provider could not be verified for embedded playback.",
-    "reviewedOn": "2026-10-21"
+    "note": "The snow-stake provider fails to load on Breckenridge’s own camera page. No usable public image is currently available.",
+    "reviewedOn": "2026-10-22"
   },
   {
     "id": "aspen-panorama",
@@ -888,9 +887,9 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://tellurideskiresort.com/webcams/",
     "source": "https://tellurideskiresort.com/webcams/",
-    "note": "The resort’s powder cameras open on its dedicated camera page.",
+    "note": "The powder camera embedded on Telluride’s official page returns 404. No usable public image is currently available.",
     "playerUrl": "https://tellurideskiresort.com/cams/",
-    "reviewedOn": "2026-10-21"
+    "reviewedOn": "2026-10-22"
   },
   {
     "id": "telluride-pow-2",
@@ -900,9 +899,9 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://tellurideskiresort.com/webcams/",
     "source": "https://tellurideskiresort.com/webcams/",
-    "note": "The resort’s powder cameras open on its dedicated camera page.",
+    "note": "The powder camera embedded on Telluride’s official page returns 404. No usable public image is currently available.",
     "playerUrl": "https://tellurideskiresort.com/cams/",
-    "reviewedOn": "2026-10-21"
+    "reviewedOn": "2026-10-22"
   },
   {
     "id": "monarch-pioneer",
@@ -913,7 +912,8 @@ window.powderlineCameraCatalog = [
     "src": "https://player.brownrice.com/embed/skimonarchgarfield",
     "source": "https://skimonarch.com/conditions/cams/",
     "previewSrc": "https://player.brownrice.com/snapshot/skimonarchgarfield",
-    "reviewedOn": "2026-10-21"
+    "reviewedOn": "2026-10-22",
+    "note": "The provider currently reports this camera is scheduled offline. Its status graphic is excluded from camera images."
   },
   {
     "id": "monarch-sundeck",

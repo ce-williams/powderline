@@ -24,6 +24,25 @@ class SnapshotTests(unittest.TestCase):
             with self.assertRaises(Exception):
                 snapshots.normalize_image(body)
 
+    def test_known_offline_graphic_is_rejected_including_resized_jpeg_and_retention(self):
+        body = (Path(__file__).parent / "fixtures/brownrice-offline.jpg").read_bytes()
+        with Image.open(BytesIO(body)) as image:
+            image.thumbnail((960, 720))
+            encoded = BytesIO()
+            image.save(encoded, format="JPEG", quality=82)
+        for candidate in [body, encoded.getvalue()]:
+            with self.assertRaisesRegex(ValueError, "Provider status graphic"):
+                snapshots.normalize_image(candidate)
+        with tempfile.TemporaryDirectory() as directory, patch.object(snapshots, "download", return_value=body):
+            entry = {"file": "snapshots/test-cam.jpg", "fetchedAt": "2026-10-22T10:00:00Z", "sha256": hashlib.sha256(body).hexdigest()}
+            with self.assertRaisesRegex(ValueError, "Provider status graphic"):
+                snapshots.retain_snapshot(Path(directory), "test-cam", entry)
+
+    def test_black_night_frame_is_not_confused_with_offline_graphic(self):
+        output = BytesIO()
+        Image.new("RGB", (640, 360), (0, 0, 0)).save(output, format="JPEG")
+        self.assertTrue(snapshots.normalize_image(output.getvalue()))
+
     def test_nighttime_frames_are_valid_and_large_images_are_reduced(self):
         body = snapshots.normalize_image(camera_image((1920, 1080)))
         with Image.open(BytesIO(body)) as image:

@@ -106,23 +106,7 @@ h2 { color: var(--paper); font: 600 27px/.98 var(--display); letter-spacing: .01
 .camera-panel[hidden] { display: none; }
 .camera-frame { position: relative; aspect-ratio: 16 / 9; background: #0b1314; overflow: hidden; }
 .camera-frame iframe, .camera-frame img { border: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
-.camera-frame iframe { position: absolute; inset: 0; z-index: 1; opacity: 0; }
-.camera-frame.player-loaded:not(.show-still) iframe { opacity: 1; }
 .camera-frame.image-frame img, .camera-frame.preview-frame img { position: absolute; inset: 0; }
-.player-pending { background: #101d1d; }
-.player-entry { position: absolute; z-index: 2; right: 10px; bottom: 10px; display: grid; justify-items: end; gap: 5px; }
-.player-entry-label { color: white; background: rgba(8, 15, 16, .78); padding: 5px 7px; font: 8px var(--mono); letter-spacing: .12em; }
-.load-player { min-height: 34px; border: 1px solid var(--ice-deep); background: rgba(8, 15, 16, .9); color: var(--ice); padding: 7px 10px; font: 10px var(--mono); letter-spacing: .02em; }
-.load-player:hover { border-color: var(--ice); background: rgba(139, 216, 207, .14); }
-.show-still-button { position: absolute; z-index: 3; right: 8px; bottom: 8px; min-height: 28px; border: 1px solid var(--ice-deep); background: rgba(8, 15, 16, .9); color: var(--ice); padding: 5px 8px; font: 9px var(--mono); }
-.show-still-button:hover { border-color: var(--ice); }
-.embed-placeholder { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 13px; padding: 20px; background: radial-gradient(ellipse at 85% 5%, rgba(71, 116, 109, .25), transparent 48%), #101d1d; }
-.embed-placeholder-copy { display: grid; gap: 7px; max-width: 320px; }
-.embed-placeholder-copy strong { color: var(--paper); font: 500 19px/1.1 var(--display); }
-.embed-placeholder-copy > span:last-child { color: var(--paper-dim); font-size: 10px; line-height: 1.45; }
-.embed-placeholder-kicker { color: var(--ice); font: 8px var(--mono); letter-spacing: .1em; }
-.embed-placeholder-link { border: 1px solid rgba(139, 216, 207, .45); color: var(--ice); padding: 8px 10px; font: 8px var(--mono); letter-spacing: .06em; text-decoration: none; }
-.embed-placeholder-link:hover { background: rgba(139, 216, 207, .1); }
 .frame-index, .frame-category, .image-refresh-note { position: absolute; z-index: 2; font: 500 8px var(--mono); letter-spacing: .075em; color: #f0f4ee; background: rgba(8, 15, 16, .7); padding: 6px 8px; pointer-events: none; }
 .frame-index { top: 9px; left: 9px; }
 .frame-category { bottom: 9px; left: 9px; color: var(--ice); }
@@ -322,7 +306,7 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
 .camera-fallback p { color: var(--paper-dim); font-size: 11px; line-height: 1.5; }
 .camera-fallback a { align-self: flex-start; color: var(--ice); font: 10px var(--mono); padding: 8px 0; text-decoration: underline; text-underline-offset: 3px; }
 .camera-panel[data-provider="link"] .frame-category { display: none; }
-.camera-frame.player-loaded:not(.show-still) .camera-fallback { display: none; }
+
 @media (max-width: 480px) {
   .camera-fallback { padding: 38px 14px 48px; gap: 6px; }
   .camera-fallback strong { font-size: 17px; }
@@ -333,3 +317,10 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
 .snapshot-badge[hidden], .image-status[hidden], .image-refresh-note[hidden] { display: none; }
 .snapshot-stale .snapshot-badge, .snapshot-stale .image-checked { color: var(--orange); }
 .snapshot-stale .source-dot.is-ready { background: var(--orange); }
+
+/* Unavailable sources are explicit, without filling the camera wall with empty tiles. */
+.unavailable-cameras { margin-top: 12px; border: 1px solid var(--line); padding: 12px; }
+.unavailable-cameras[hidden] { display: none; }
+.unavailable-cameras summary { color: var(--paper-dim); cursor: pointer; font: 11px var(--mono); }
+.unavailable-cameras[open] summary { margin-bottom: 12px; }
+.unavailable-cameras .camera-frame { aspect-ratio: auto; min-height: 160px; }
