@@ -314,3 +314,17 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Keep source links visible when a provider is offline or restricts previews. */
+.camera-frame img[hidden], .camera-fallback[hidden] { display: none; }
+.camera-fallback { position: absolute; inset: 0; padding: 36px 14px 44px; display: flex; flex-direction: column; justify-content: center; gap: 6px; background: #101d1d; }
+.camera-fallback strong { color: var(--paper); font: 500 19px/1.1 var(--display); }
+.camera-fallback p { color: var(--paper-dim); font-size: 11px; line-height: 1.5; }
+.camera-fallback a { align-self: flex-start; color: var(--ice); font: 10px var(--mono); padding: 8px 0; text-decoration: underline; text-underline-offset: 3px; }
+.camera-panel[data-provider="link"] .frame-category { display: none; }
+.camera-frame.player-loaded:not(.show-still) .camera-fallback { display: none; }
+@media (max-width: 480px) {
+  .camera-fallback { padding: 38px 14px 48px; gap: 6px; }
+  .camera-fallback strong { font-size: 17px; }
+  .camera-fallback p { font-size: 11px; line-height: 1.35; }
+}

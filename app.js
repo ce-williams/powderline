@@ -1,10 +1,8 @@
 const cameraCatalog = window.powderlineCameraCatalog || [];
-const regions = [
-  { name: "Summit County", resorts: ["Arapahoe Basin", "Keystone", "Breckenridge", "Copper Mountain"] },
-  { name: "Eagle County", resorts: ["Vail", "Beaver Creek"] },
-  { name: "Clear Creek County", resorts: ["Loveland"] },
-  { name: "Gunnison County", resorts: ["Crested Butte"] },
-];
+const resortCatalog = window.powderlineResortCatalog || [];
+const regions = [...new Set(resortCatalog.map((resort) => resort.region))].map((name) => ({
+  name, resorts: resortCatalog.filter((resort) => resort.region === name).map((resort) => resort.name),
+}));
 const resortOrder = regions.flatMap((region) => region.resorts);
 const orderedCameras = [...cameraCatalog].sort((a, b) => {
   return resortOrder.indexOf(a.resort) - resortOrder.indexOf(b.resort);
@@ -67,7 +65,7 @@ function loadPlayer(frame, camera) {
     stillButton.textContent = showStill ? "Resume player" : "Show last image";
     stillButton.setAttribute("aria-pressed", String(showStill));
   });
-  frame.append(stillButton);
+  if (frame.querySelector("img.live-image")) frame.append(stillButton);
   frame.querySelector(".expand-button").hidden = false;
 }
 
@@ -75,6 +73,8 @@ function createCameraCard(camera, index) {
   const card = makeElement("article", "camera-panel");
   card.dataset.resort = camera.resort;
   card.dataset.cameraId = camera.id;
+  card.dataset.directory = String(Boolean(camera.directory));
+  card.dataset.provider = camera.provider;
 
   const frame = makeElement("div", `camera-frame${camera.provider === "image" ? " image-frame" : " preview-frame"}`);
   if (camera.provider === "image" || camera.previewSrc) {
@@ -86,7 +86,9 @@ function createCameraCard(camera, index) {
     image.referrerPolicy = "strict-origin-when-cross-origin";
     frame.append(image);
   }
-  if (camera.provider === "image") {
+  if (camera.provider === "link") {
+    // Source-only cameras remain accessible without loading a blocked player.
+  } else if (camera.provider === "image") {
     // The latest still is the camera view; no video player is needed.
   } else if (window.location.protocol === "file:") {
     // A file:// page has an opaque origin. Many camera providers reject its
@@ -104,8 +106,8 @@ function createCameraCard(camera, index) {
   } else {
     frame.classList.add("player-pending");
     const entry = makeElement("div", "player-entry");
-    entry.append(makeElement("span", "player-entry-label", "LATEST CAMERA IMAGE"));
-    const load = makeElement("button", "load-player", "Play live video →");
+    entry.append(makeElement("span", "player-entry-label", camera.previewSrc ? "LATEST SOURCE IMAGE" : "CAMERA ON REQUEST"));
+    const load = makeElement("button", "load-player", "Load camera player →");
     load.type = "button";
     load.setAttribute("aria-label", `Load ${camera.resort} ${camera.name} camera`);
     load.addEventListener("click", () => loadPlayer(frame, camera), { once: true });
@@ -113,7 +115,15 @@ function createCameraCard(camera, index) {
     frame.append(entry);
   }
 
-  frame.append(makeElement("span", "frame-index", `CAM ${String(index + 1).padStart(2, "0")} / ${cameraCatalog.length}`));
+  const fallback = makeElement("div", "camera-fallback");
+  fallback.hidden = camera.provider !== "link";
+  fallback.append(
+    makeElement("strong", "", camera.directory ? "Webcam not available" : "View on resort website"),
+    makeElement("p", "", camera.note || "This preview could not be loaded. You can still open the official camera source."),
+    makeExternalLink(camera.playerUrl || camera.source, camera.directory ? "SKI AREA WEBSITE ↗" : "OPEN RESORT CAMERAS ↗")
+  );
+  frame.append(fallback);
+  frame.append(makeElement("span", "frame-index", camera.directory ? "SKI AREA INFO" : `CAM ${String(index + 1).padStart(2, "0")} / ${cameraCatalog.length}`));
   const expand = makeElement("button", "expand-button", "⛶");
   expand.type = "button";
   expand.setAttribute("aria-label", `Expand ${camera.resort} ${camera.name} camera`);
@@ -138,7 +148,7 @@ function createCameraCard(camera, index) {
   if (camera.provider === "image" || camera.previewSrc) {
     sourceDetails.append(document.createTextNode("IMAGE CHECKED "), makeElement("time", "image-checked", "—"), document.createElement("br"));
   }
-  sourceDetails.append(makeExternalLink(camera.playerUrl || (camera.provider === "image" ? camera.source : camera.src), camera.provider === "image" ? "OPEN CAM ↗" : "OPEN PLAYER ↗"));
+  sourceDetails.append(makeExternalLink(camera.playerUrl || (camera.provider === "image" ? camera.source : camera.src), camera.provider === "link" ? "OPEN WEBSITE ↗" : camera.provider === "image" ? "OPEN CAM ↗" : "OPEN PLAYER ↗"));
   sourceDetails.append(document.createElement("br"), makeExternalLink(camera.source, "RESORT CAMS ↗"));
   source.append(sourceDetails);
   caption.append(source);
@@ -152,9 +162,10 @@ function populateResortFilter() {
   const allOption = makeElement("option", "", `All resorts · ${cameraCatalog.length} cameras`);
   allOption.value = "all";
   resortFilter.append(allOption);
-  counts.forEach((count, resort) => {
-    const option = makeElement("option", "", `${resort} · ${count} cameras`);
-    option.value = resort;
+  resortCatalog.forEach((resort) => {
+    const count = counts.get(resort.name) || 0;
+    const option = makeElement("option", "", `${resort.name} · ${count ? `${count} camera${count === 1 ? "" : "s"}` : "source info"}`);
+    option.value = resort.name;
     resortFilter.append(option);
   });
 }
@@ -179,10 +190,23 @@ orderedCameras.forEach((camera, index) => {
   cameraRegions.get(region.name).grid.append(card);
 });
 
-const resortCount = new Set(cameraCatalog.map((camera) => camera.resort)).size;
-document.querySelector("#camera-summary").textContent = `${cameraCatalog.length} CAMERAS · ${resortCount} COLORADO RESORTS`;
-document.querySelector("#brief-lead").textContent = `${cameraCatalog.length} resort cameras across ${resortCount} Colorado resorts. Direct views from the official sources. No invented snow totals.`;
-document.querySelector("#report-summary").textContent = `${resortCount} RESORTS · MEASUREMENTS`;
+resortCatalog.filter((resort) => !cameraCatalog.some((camera) => camera.resort === resort.name)).forEach((resort) => {
+  const card = createCameraCard({
+    id: `directory-${resort.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+    resort: resort.name, name: "Webcam availability", kind: "SKI AREA", provider: "link",
+    src: resort.source, source: resort.source, directory: true,
+    note: resort.note || "No public mountain webcam was found during the latest source review. Check the ski area’s website for updates.",
+  }, 0);
+  cameraCards.push(card);
+  cameraRegions.get(resort.region).grid.append(card);
+});
+
+const resortCount = resortCatalog.length;
+const previewCount = cameraCatalog.filter((camera) => camera.provider !== "link").length;
+const sourceOnlyCount = cameraCatalog.length - previewCount;
+document.querySelector("#camera-summary").textContent = `${cameraCatalog.length} CAMERAS · ${resortCount} COLORADO SKI AREAS`;
+document.querySelector("#brief-lead").textContent = `Explore ${resortCount} Colorado ski areas: ${previewCount} camera views on the wall and ${sourceOnlyCount} cameras on official resort sites. Every ski area stays within reach.`;
+document.querySelector("#report-summary").textContent = `${document.querySelectorAll("#resort-report tbody tr").length} RESORTS · MEASUREMENTS`;
 
 function updateRegionVisibility() {
   cameraRegions.forEach(({ section }) => {
@@ -197,30 +221,34 @@ function paintClock() {
 }
 
 function updateFeedCount() {
-  const eligible = cameraCards.filter((card) => card.dataset.unavailable !== "true" && (activeResort === "all" || card.dataset.resort === activeResort));
-  const imageReady = eligible.filter((card) => card.querySelector("img.live-image") && card.dataset.ready === "true" && card.dataset.unavailable !== "true").length;
+  const eligible = cameraCards.filter((card) => card.dataset.directory !== "true" && (activeResort === "all" || card.dataset.resort === activeResort));
+  const imageReady = eligible.filter((card) => card.querySelector("img.live-image") && card.dataset.ready === "true").length;
+  const sourceOnly = eligible.filter((card) => card.dataset.provider === "link").length;
+  const unavailable = eligible.filter((card) => card.dataset.unavailable === "true").length;
   document.querySelector("#feed-count").textContent = `${eligible.length} CAMERAS LISTED`;
-  document.querySelector("#feed-detail").textContent = window.location.protocol === "file:"
-    ? "Local preview · use hosted page for embeds"
-    : imageReady > 0
-      ? `${imageReady} camera image${imageReady === 1 ? "" : "s"} loaded · Video on request`
-      : "Camera images loading";
+  document.querySelector("#feed-detail").textContent = eligible.length
+    ? `${imageReady} images loaded · ${sourceOnly} on resort sites${unavailable ? ` · ${unavailable} previews unavailable` : ""}`
+    : "No public webcam found · Ski area website available below";
 }
 
-function hideUnavailable(card, reason) {
+function showUnavailable(card, reason) {
   card.dataset.ready = "false";
   card.dataset.unavailable = "true";
-  card.querySelectorAll(".source-dot").forEach((dot) => dot.classList.remove("is-ready"));
-  card.hidden = true;
-  card.setAttribute("aria-hidden", "true");
   card.dataset.failureReason = reason;
-  updateRegionVisibility();
+  card.querySelectorAll(".source-dot").forEach((dot) => dot.classList.remove("is-ready"));
+  card.querySelector(".camera-fallback").hidden = false;
+  const image = card.querySelector("img.live-image");
+  if (image) image.hidden = true;
   updateFeedCount();
 }
 
 function markReady(card) {
-  if (card.dataset.unavailable === "true") return;
   card.dataset.ready = "true";
+  card.dataset.unavailable = "false";
+  delete card.dataset.failureReason;
+  card.querySelector(".camera-fallback").hidden = true;
+  const image = card.querySelector("img.live-image");
+  if (image) image.hidden = false;
   card.querySelectorAll(".source-dot").forEach((dot) => dot.classList.add("is-ready"));
   updateFeedCount();
 }
@@ -237,7 +265,7 @@ function prepareImage(card) {
     setImageCheck(card);
     markReady(card);
   });
-  image.addEventListener("error", () => hideUnavailable(card, "image request failed"));
+  image.addEventListener("error", () => showUnavailable(card, "image request failed"));
   if (image.complete && image.naturalWidth > 0) {
     setImageCheck(card);
     markReady(card);
@@ -247,8 +275,7 @@ function prepareImage(card) {
 function applyResortFilter() {
   activeResort = resortFilter.value;
   cameraCards.forEach((card) => {
-    const unavailable = card.dataset.unavailable === "true";
-    card.hidden = unavailable || (activeResort !== "all" && card.dataset.resort !== activeResort);
+    card.hidden = activeResort !== "all" && card.dataset.resort !== activeResort;
     card.setAttribute("aria-hidden", String(card.hidden));
   });
   updateRegionVisibility();
@@ -272,6 +299,9 @@ function refreshCamera(card) {
       markReady(card);
     };
     // If a fresh request fails, keep the last image that loaded successfully.
+    nextImage.onerror = () => {
+      if (card.dataset.ready !== "true") showUnavailable(card, "image request failed");
+    };
     nextImage.src = url.href;
   }
   updateFeedCount();
@@ -320,6 +350,6 @@ document.querySelector("#refresh-all").addEventListener("click", (event) => {
 paintClock();
 window.setInterval(paintClock, 15000);
 window.setInterval(() => {
-  cameraCards.filter((card) => card.querySelector("img.live-image") && !card.hidden && card.dataset.unavailable !== "true").forEach(refreshCamera);
+  cameraCards.filter((card) => card.querySelector("img.live-image") && !card.hidden).forEach(refreshCamera);
 }, 5 * 60 * 1000);
 updateFeedCount();

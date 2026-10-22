@@ -21,23 +21,24 @@ The app is plain HTML, CSS, and JavaScript, with relative asset paths so it work
 3. Push changes to `main`; `.github/workflows/pages.yml` publishes the static site automatically.
 4. After the first successful deployment, enable **Enforce HTTPS** in the same settings area if it is not already on.
 
-## Camera loading and privacy
+## Colorado camera coverage
 
-- The camera catalog covers eight Colorado resorts. Use the resort selector to narrow the wall.
-- Brownrice video cameras show the latest poster JPEG exposed by their player. Video iframes load only when selected, and the viewer can return to the still image if playback fails. The browser checks that each image loads before showing its camera card.
-- Still images refresh every five minutes. A failed refresh keeps the last image that loaded successfully during the current visit. A first-load failure hides the camera card.
-- The Breckenridge snow stake time-lapse is omitted while its provider has an invalid HTTPS certificate.
-- A Content Security Policy in `index.html` limits scripts and styles to this site, frames to Brownrice, and images to the listed camera hosts. External fonts are not requested.
-- External links that open a new tab use `noopener noreferrer`.
+The directory covers **34 Colorado ski areas**, including all four Aspen Snowmass mountains and the municipal hills. Each area appears in the resort selector even if a public camera could not be verified. Cameras are grouped by region.
 
-## Source integrity
+- Camera images and click-to-load players are shown where a public source is available.
+- Winter Park’s restricted players, Steamboat’s unverified offsite feeds, and other source-only cameras have explicit links to their official camera pages. They are counted separately from on-page views.
+- Eldora’s official maintenance notice is shown. Ski areas without a verified public feed get a website link and an availability note rather than an invented camera.
+- Initial image failures keep the camera card and official source link visible. Refresh retries failed previews and keeps the last successful image when a later request fails.
+- A successfully loaded image may still be stale or contain a provider’s offline slate. “Image checked” records when the browser loaded it, not its capture time.
+- Video players load only on request. Still images refresh every five minutes. CSP allows only the camera providers used by the catalog; external links use `noopener noreferrer`.
 
-- The camera wall links each listed view to its player and resort page. Cross-origin video playback cannot be verified by the parent page.
-- `camera-catalog.js` provides the runtime camera list; `source-registry.json` records the same official camera URLs and any known source limitations.
-- The catalog review date is not a promise that a camera will stay available. Provider streams can go offline later.
-- The app refreshes visible stills and Brownrice posters on a five-minute cadence without replacing a successfully loaded image when a new request fails.
-- Resort snowfall, depth, weather, terrain, and lift totals are intentionally blank until a timestamped source adapter is implemented. No demo or inferred conditions are included.
-- Road conditions are linked to COtrip. No road safety state is inferred from camera imagery.
+## Source integrity and validation
+
+`camera-catalog.js` is the runtime source for both the resort directory and camera list. `source-registry.json` mirrors both lists with a review date and public provenance. Resort sources and HDRelay public camera configurations identify the listed views. No access-controlled or credential-bearing feeds are included.
+
+Run `node --test tests/catalog.test.mjs` to validate statewide coverage, unique identifiers, HTTPS URLs, provider restrictions, CSP compatibility, and source-registry parity. The Pages workflow runs these checks before deploying and publishes only the site assets.
+
+Resort snowfall, depth, weather, terrain, and lift totals stay blank until a timestamped source adapter is implemented. Road conditions link to COtrip; camera images do not establish road safety.
 
 ## Current implementation boundary
 
