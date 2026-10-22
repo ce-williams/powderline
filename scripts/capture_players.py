@@ -7,7 +7,7 @@ import asyncio
 from collections import defaultdict
 import re
 from playwright.async_api import async_playwright
-from build_snapshots import public_url, write_snapshot
+from build_snapshots import download, public_url, write_snapshot
 
 
 async def descendant_frames(frame):
@@ -53,14 +53,26 @@ async def capture_view(page, config):
                         continue
                     ready = await video.evaluate("v => v.readyState >= 2 && v.videoWidth >= 160 && v.videoHeight >= 90")
                     if ready:
-                        return await video.screenshot(type="jpeg", quality=85, timeout=6000)
+                        return await video.screenshot(type="jpeg", quality=85, timeout=6000), "rendered-camera"
                 if config.get("imageFrame"):
                     for image in await frame.locator("img").all():
                         ready = await image.evaluate("i => i.complete && i.naturalWidth >= 160 && i.naturalHeight >= 90 && !new URL(i.currentSrc).username")
                         if ready and await image.is_visible():
-                            return await image.screenshot(type="jpeg", quality=85, timeout=6000)
+                            return await image.screenshot(type="jpeg", quality=85, timeout=6000), "rendered-camera"
         await asyncio.sleep(1)
-    raise ValueError("No ready camera image or video")
+    # Public poster images can remain available while video playback is stopped.
+    # Only use the poster of the specifically selected camera frame, never logos
+    # or unrelated images from the surrounding resort page.
+    for root in await selected_frames(page, config):
+        async for frame in descendant_frames(root):
+            for video in await frame.locator("video[poster]").all():
+                poster = await video.get_attribute("poster")
+                if poster and poster.startswith("https://"):
+                    try:
+                        return await asyncio.to_thread(download, public_url(poster)), "provider-preview"
+                    except Exception:
+                        continue
+    raise ValueError("No ready camera image, video, or public poster")
 
 
 async def run(cameras, configs, output, previous):
@@ -95,11 +107,11 @@ async def run(cameras, configs, output, previous):
                                 target = page.locator(selector).first
                                 if await target.count():
                                     await target.scroll_into_view_if_needed(timeout=6000)
-                            body = await capture_view(page, config)
-                            entries[camera["id"]] = write_snapshot(output, camera["id"], body, previous.get(camera["id"]), method="rendered-camera")
+                            body, method = await capture_view(page, config)
+                            entries[camera["id"]] = write_snapshot(output, camera["id"], body, previous.get(camera["id"]), method=method)
                             print("Captured player: " + camera["id"], flush=True)
-                        except Exception:
-                            print("Player not ready: " + camera["id"], flush=True)
+                        except Exception as error:
+                            print("Player not ready: " + camera["id"] + " (" + type(error).__name__ + ")", flush=True)
                 except Exception:
                     print("Camera page unavailable: " + items[0][0]["resort"], flush=True)
                 finally:

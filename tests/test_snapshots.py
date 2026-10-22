@@ -74,6 +74,19 @@ class SnapshotTests(unittest.TestCase):
             self.assertEqual(entry["method"], "provider-preview")
             self.assertTrue((Path(directory) / entry["file"]).exists())
 
+    def test_steamboat_and_sunlight_images_do_not_depend_on_loading_the_resort_page(self):
+        root = Path(__file__).resolve().parents[1]
+        configs = json.loads((root / "snapshot-sources.json").read_text())
+        cameras = {camera["id"]: camera for camera in json.loads((root / "source-registry.json").read_text())["cameras"]}
+        ids = ["steamboat-mid-snow", "steamboat-champagne", "steamboat-square", "steamboat-gondola", "steamboat-christie", "steamboat-four-points", "sunlight-stake"]
+        with tempfile.TemporaryDirectory() as directory:
+            for camera_id in ids:
+                with self.subTest(camera=camera_id), patch.object(snapshots, "download", return_value=camera_image()) as fetch:
+                    _, entry = snapshots.capture_image(cameras[camera_id], Path(directory), {}, configs[camera_id])
+                    fetch.assert_called_once_with(configs[camera_id]["snapshotUrl"])
+                    self.assertIsNotNone(entry)
+                    self.assertTrue((Path(directory) / entry["file"]).exists())
+
     def test_manifest_cannot_supply_arbitrary_paths_or_authenticated_urls(self):
         self.assertFalse(snapshots.valid_entry("test-cam", {"file": "../private.jpg", "fetchedAt": "2026-10-21T10:00:00Z"}))
         for url in ["http://example.com/cam", "https://user:secret@example.com/cam"]:

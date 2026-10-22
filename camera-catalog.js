@@ -1093,22 +1093,24 @@ window.powderlineCameraCatalog = [
   {
     "id": "sunlight-compass",
     "resort": "Sunlight Mountain",
-    "name": "Compass Peak",
+    "name": "PHQ Cam",
     "kind": "MOUNTAIN VIEW",
     "provider": "iframe",
     "src": "https://g0.ipcamlive.com/player/player.php?alias=compasspeak",
     "source": "https://sunlightmtn.com/explore/mountain-status/",
-    "reviewedOn": "2026-10-21"
+    "reviewedOn": "2026-10-21",
+    "note": "This provider is not currently returning a usable image. The player and official camera page remain available."
   },
   {
     "id": "sunlight-sopris",
     "resort": "Sunlight Mountain",
-    "name": "Mount Sopris",
+    "name": "Leonard’s Lookout",
     "kind": "MOUNTAIN VIEW",
     "provider": "iframe",
     "src": "https://g0.ipcamlive.com/player/player.php?alias=sopris",
     "source": "https://sunlightmtn.com/explore/mountain-status/",
-    "reviewedOn": "2026-10-21"
+    "reviewedOn": "2026-10-21",
+    "note": "This provider is not currently returning a usable image. The player and official camera page remain available."
   },
   {
     "id": "cooper-top",
@@ -1203,7 +1205,7 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.steamboat.com/the-mountain/live-cams",
     "source": "https://www.steamboat.com/the-mountain/live-cams",
-    "note": "Watch on Steamboat’s official camera page. An offsite feed could not be verified.",
+    "note": "A cached preview from the resort’s public camera player appears here after the next successful hourly capture.",
     "reviewedOn": "2026-10-21"
   },
   {
@@ -1214,7 +1216,7 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.steamboat.com/the-mountain/live-cams",
     "source": "https://www.steamboat.com/the-mountain/live-cams",
-    "note": "Watch on Steamboat’s official camera page. An offsite feed could not be verified.",
+    "note": "A cached preview from the resort’s public camera player appears here after the next successful hourly capture.",
     "reviewedOn": "2026-10-21"
   },
   {
@@ -1225,7 +1227,7 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.steamboat.com/the-mountain/live-cams",
     "source": "https://www.steamboat.com/the-mountain/live-cams",
-    "note": "Watch on Steamboat’s official camera page. An offsite feed could not be verified.",
+    "note": "A cached preview from the resort’s public camera player appears here after the next successful hourly capture.",
     "reviewedOn": "2026-10-21"
   },
   {
@@ -1236,7 +1238,7 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.steamboat.com/the-mountain/live-cams",
     "source": "https://www.steamboat.com/the-mountain/live-cams",
-    "note": "Watch on Steamboat’s official camera page. An offsite feed could not be verified.",
+    "note": "A cached preview from the resort’s public camera player appears here after the next successful hourly capture.",
     "reviewedOn": "2026-10-21"
   },
   {
@@ -1247,7 +1249,7 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.steamboat.com/the-mountain/live-cams",
     "source": "https://www.steamboat.com/the-mountain/live-cams",
-    "note": "Watch on Steamboat’s official camera page. An offsite feed could not be verified.",
+    "note": "A cached preview from the resort’s public camera player appears here after the next successful hourly capture.",
     "reviewedOn": "2026-10-21"
   },
   {
@@ -1258,7 +1260,7 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.steamboat.com/the-mountain/live-cams",
     "source": "https://www.steamboat.com/the-mountain/live-cams",
-    "note": "Watch on Steamboat’s official camera page. An offsite feed could not be verified.",
+    "note": "A cached preview from the resort’s public camera player appears here after the next successful hourly capture.",
     "reviewedOn": "2026-10-21"
   },
   {
@@ -1269,7 +1271,7 @@ window.powderlineCameraCatalog = [
     "provider": "link",
     "src": "https://www.steamboat.com/the-mountain/live-cams",
     "source": "https://www.steamboat.com/the-mountain/live-cams",
-    "note": "Watch on Steamboat’s official camera page. An offsite feed could not be verified.",
+    "note": "Steamboat currently marks the Thunderhead camera as down. No public camera image is available from this source.",
     "reviewedOn": "2026-10-21"
   }
 ];

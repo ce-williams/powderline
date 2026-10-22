@@ -47,24 +47,52 @@
     "label": "Snow Stake"
   },
   "steamboat-mid-snow": {
-    "label": "Mid Mountain Snow Cam"
+    "page": "https://www.steamboat.com/the-mountain/live-cams",
+    "frameMatch": "z932LD9n3WiXzRkMqsmNmjyU8MqiNZgl4pcTe5dD",
+    "snapshotUrl": "https://i.ytimg.com/vi/lKc9xwndUK4/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview",
+    "videoSource": "https://www.youtube.com/watch?v=lKc9xwndUK4"
   },
   "steamboat-champagne": {
-    "label": "Champagne Powder\u00ae Snow Cam"
+    "page": "https://www.steamboat.com/the-mountain/live-cams",
+    "frameMatch": "djHMkYYjhzVkbTdofykvdne8xIbhJkDrv8w1RDil",
+    "snapshotUrl": "https://i.ytimg.com/vi/Vz_BJ5NJOM0/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview",
+    "videoSource": "https://www.youtube.com/watch?v=Vz_BJ5NJOM0"
   },
   "steamboat-square": {
-    "label": "Steamboat Square Cam"
+    "page": "https://www.steamboat.com/the-mountain/live-cams",
+    "frameMatch": "vAkVcL1wQM3O2RoBIYHzmVocEqHVMq4IMdmnCdBV",
+    "snapshotUrl": "https://i.ytimg.com/vi/2UJDLWcSADk/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview",
+    "videoSource": "https://www.youtube.com/watch?v=2UJDLWcSADk"
   },
   "steamboat-gondola": {
-    "label": "Steamboat Gondola Cam"
+    "page": "https://www.steamboat.com/the-mountain/live-cams",
+    "frameMatch": "X28Vq5WIiHdSI328XgKVKHBjbvTwxWn2Q3DVJHna",
+    "snapshotUrl": "https://i.ytimg.com/vi/oKKj_upaoCI/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview",
+    "videoSource": "https://www.youtube.com/watch?v=oKKj_upaoCI"
   },
   "steamboat-christie": {
-    "label": "Christie Peak Express & Wild Blue GOndola Cam"
+    "page": "https://www.steamboat.com/the-mountain/live-cams",
+    "frameMatch": "KXNgHfG2vkd07TQS97jhYfobSXJMyKw1EgfzQtNj",
+    "snapshotUrl": "https://i.ytimg.com/vi/nfTQNv3jdSQ/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview",
+    "videoSource": "https://www.youtube.com/watch?v=nfTQNv3jdSQ"
   },
   "steamboat-four-points": {
-    "label": "Four POints Cam"
+    "page": "https://www.steamboat.com/the-mountain/live-cams",
+    "frameMatch": "5uBBjejUkVjUeOZCPYZbJwVjNUzuHzCGn3GL7edd",
+    "snapshotUrl": "https://i.ytimg.com/vi/Zf21nwFUyUs/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview",
+    "videoSource": "https://www.youtube.com/watch?v=Zf21nwFUyUs"
   },
   "steamboat-thunderhead": {
     "label": "Thunderhead Cam"
+  },
+  "sunlight-stake": {
+    "snapshotUrl": "https://s106.ipcamlive.com/streams/6axfhgqtmlvvk1b8c/snapshot.jpg",
+    "snapshotKind": "source-image"
   }
 }

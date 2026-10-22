@@ -123,10 +123,10 @@ function createCameraCard(camera, index) {
   }
 
   const fallback = makeElement("div", "camera-fallback");
-  fallback.hidden = camera.provider !== "link" || Boolean(snapshot);
+  fallback.hidden = Boolean(snapshot || camera.previewSrc || camera.provider === "image");
   fallback.append(
-    makeElement("strong", "", camera.directory ? "Webcam not available" : "View on resort website"),
-    makeElement("p", "", camera.note || "This preview could not be loaded. You can still open the official camera source."),
+    makeElement("strong", "", camera.directory ? "Webcam not available" : "No captured image yet"),
+    makeElement("p", "", camera.note || "This camera has not supplied a usable snapshot yet. The player or official camera source may still be available."),
     makeExternalLink(camera.playerUrl || camera.source, camera.directory ? "SKI AREA WEBSITE ↗" : "OPEN RESORT CAMERAS ↗")
   );
   frame.append(fallback);
@@ -169,13 +169,15 @@ function createCameraCard(camera, index) {
 
 function populateResortFilter() {
   const counts = new Map();
+  resortFilter.replaceChildren();
   orderedCameras.forEach((camera) => counts.set(camera.resort, (counts.get(camera.resort) || 0) + 1));
   const allOption = makeElement("option", "", `All resorts · ${cameraCatalog.length} cameras`);
   allOption.value = "all";
   resortFilter.append(allOption);
   resortCatalog.forEach((resort) => {
     const count = counts.get(resort.name) || 0;
-    const option = makeElement("option", "", `${resort.name} · ${count ? `${count} camera${count === 1 ? "" : "s"}` : "source info"}`);
+    const captured = cameraCatalog.filter((camera) => camera.resort === resort.name && cachedSnapshot(camera.id)).length;
+    const option = makeElement("option", "", `${resort.name} · ${count ? `${captured}/${count} images` : "no verified webcam"}`);
     option.value = resort.name;
     resortFilter.append(option);
   });
@@ -234,6 +236,8 @@ function updateFeedCount() {
   const imageReady = eligible.filter((card) => card.querySelector("img.live-image") && card.dataset.ready === "true").length;
   const sourceOnly = eligible.filter((card) => card.dataset.provider === "link" && !card.querySelector("img.live-image")).length;
   const cached = eligible.filter((card) => card.dataset.snapshotFetchedAt).length;
+  const totalCached = cameraCatalog.filter((camera) => cachedSnapshot(camera.id)).length;
+  document.querySelector("#camera-summary").textContent = `${totalCached} CACHED IMAGES · ${cameraCatalog.length} CAMERA LISTINGS · ${resortCount} SKI AREAS`;
   const unavailable = eligible.filter((card) => card.dataset.unavailable === "true").length;
   document.querySelector("#feed-count").textContent = `${eligible.length} CAMERAS LISTED`;
   document.querySelector("#feed-detail").textContent = eligible.length
@@ -384,7 +388,11 @@ async function refreshWall() {
     const response = await fetch(new URL("./snapshots/manifest.json", document.baseURI), { cache: "no-store" });
     if (response.ok) {
       const latest = await response.json();
-      if (latest.cameras && typeof latest.cameras === "object") snapshotManifest = latest;
+      if (latest.cameras && typeof latest.cameras === "object") {
+        snapshotManifest = latest;
+        populateResortFilter();
+        resortFilter.value = activeResort;
+      }
     }
   } catch { /* Local previews or temporary outages keep the current images. */ }
   await Promise.allSettled(cameraCards.filter((card) => !card.hidden).map(refreshCamera));
