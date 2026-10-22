@@ -394,6 +394,7 @@ async function refreshWall() {
 populateResortFilter();
 cameraCards.forEach((card) => {
   prepareImage(card);
+  if (card.dataset.snapshotFetchedAt) setImageCheck(card);
 });
 resortFilter.addEventListener("change", applyResortFilter);
 
