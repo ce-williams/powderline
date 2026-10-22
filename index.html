@@ -7,7 +7,7 @@
     <meta name="description" content="A live field view of Colorado mountain cameras, snow reports, and I-70 travel conditions." />
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://*.brownrice.com https://cache.snow.com https://dirigo-resorts-f4e2bde5azc2cne6.z02.azurefd.net https://watch.hdrelay.io https://img.hdrelay.com https://manage.hdrelay.com https://cams.skiloveland.com https://*.ipcamlive.com https://backend.roundshot.com https://*.roundshot.com https://webcam.io https://*.webcam.io; frame-src https://player.brownrice.com https://*.ipcamlive.com https://skicooper.com:8443; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <title>POWDERLINE — Colorado mountain intelligence</title>
-    <link rel="stylesheet" href="./styles.css?v=colorado-34-1" />
+    <link rel="stylesheet" href="./styles.css?v=hourly-1" />
   </head>
   <body>
     <div class="app-shell">
@@ -24,7 +24,7 @@
         </nav>
         <div class="topbar-right">
           <div class="clock-block"><span class="eyebrow">COLORADO · MT</span><time id="mountain-time">--:--</time></div>
-          <button class="refresh-button" id="refresh-all" type="button" aria-label="Refresh camera feeds"><span class="refresh-icon">↻</span><span>Refresh</span></button>
+          <button class="refresh-button" id="refresh-all" type="button" aria-label="Refresh camera feeds" title="Load the latest published images. Background captures run hourly."><span class="refresh-icon">↻</span><span>Refresh</span></button>
         </div>
       </header>
 
@@ -63,7 +63,7 @@
           </div>
 
           <div class="camera-wall" id="camera-wall" aria-live="polite"></div>
-          <p class="camera-footnote"><span>CAMERA NOTE</span> All 34 Colorado ski areas are listed. Previews show the latest image supplied by each source, which may be old or show an offline notice. Players load on request; stills refresh every five minutes. A failed preview keeps its official source link available. Some cameras open on the resort’s website. <a href="./source-registry.json" target="_blank" rel="noopener noreferrer">Sources &amp; availability ↗</a></p>
+          <p class="camera-footnote"><span>HOURLY SNAPSHOTS</span> Camera images are collected about once an hour and served here. Failed captures keep the last good image, labeled with its fetch age. A source may supply an older image; fetch time is not capture time. Refresh loads the latest published batch. Live players remain optional. <a href="./snapshots/manifest.json" target="_blank" rel="noopener noreferrer">Snapshot status ↗</a> · <a href="./source-registry.json" target="_blank" rel="noopener noreferrer">Camera sources ↗</a></p>
         </section>
 
         <section class="lower-grid" id="resort-report">
@@ -139,7 +139,9 @@
 
       <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>POWDER<span class="brand-light">LINE</span></span></a><span>COLORADO MOUNTAIN INTELLIGENCE</span><span>CAMERAS ARE VISUAL OBSERVATIONS · CHECK OFFICIAL SOURCES FOR CONDITIONS</span></footer>
     </div>
-    <script src="./camera-catalog.js?v=colorado-34-1"></script>
-    <script src="./app.js?v=colorado-34-1"></script>
+    <script src="./camera-catalog.js?v=hourly-1"></script>
+    <script src="./snapshot-state.js?v=hourly-1"></script>
+    <script src="./snapshot-manifest.js?v=hourly-1"></script>
+    <script src="./app.js?v=hourly-1"></script>
   </body>
 </html>

@@ -328,3 +328,8 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
   .camera-fallback strong { font-size: 17px; }
   .camera-fallback p { font-size: 11px; line-height: 1.35; }
 }
+
+.snapshot-badge { position: absolute; z-index: 2; top: 37px; left: 9px; color: var(--ice); background: rgba(8, 15, 16, .8); padding: 5px 7px; font: 8px var(--mono); letter-spacing: .04em; pointer-events: none; }
+.snapshot-badge[hidden], .image-status[hidden], .image-refresh-note[hidden] { display: none; }
+.snapshot-stale .snapshot-badge, .snapshot-stale .image-checked { color: var(--orange); }
+.snapshot-stale .source-dot.is-ready { background: var(--orange); }

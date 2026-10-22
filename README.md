@@ -21,25 +21,30 @@ The app is plain HTML, CSS, and JavaScript, with relative asset paths so it work
 3. Push changes to `main`; `.github/workflows/pages.yml` publishes the static site automatically.
 4. After the first successful deployment, enable **Enforce HTTPS** in the same settings area if it is not already on.
 
-## Colorado camera coverage
+## Hourly camera snapshots
 
-The directory covers **34 Colorado ski areas**, including all four Aspen Snowmass mountains and the municipal hills. Each area appears in the resort selector even if a public camera could not be verified. Cameras are grouped by region.
+The directory covers **34 Colorado ski areas**, grouped by geography. GitHub Actions captures images at **17 minutes past each hour**, and on pushes or manual workflow runs. Scheduled runs can be delayed by GitHub. No new hosting account or API key is needed.
 
-- Camera images and click-to-load players are shown where a public source is available.
-- Winter Park’s restricted players, Steamboat’s unverified offsite feeds, and other source-only cameras have explicit links to their official camera pages. They are counted separately from on-page views.
-- Eldora’s official maintenance notice is shown. Ski areas without a verified public feed get a website link and an availability note rather than an invented camera.
-- Initial image failures keep the camera card and official source link visible. Refresh retries failed previews and keeps the last successful image when a later request fails.
-- A successfully loaded image may still be stale or contain a provider’s offline slate. “Image checked” records when the browser loaded it, not its capture time.
-- Video players load only on request. Still images refresh every five minutes. CSP allows only the camera providers used by the catalog; external links use `noopener noreferrer`.
+- The site serves captured JPEGs from its own `snapshots/` directory, immediately when a tile is visible. Video players remain optional.
+- Source image endpoints are preferred. Public player pages are used for cameras without a snapshot endpoint, capturing only ready video elements or explicitly configured camera images. Browser challenges, login screens, and error pages are never captured as cameras.
+- A failed source refresh downloads and preserves the last-good image from the previous public deployment. The original fetch timestamp stays unchanged. A zero-image batch aborts publication.
+- Tiles show **Fetched … ago**. Failed refreshes or images older than two hours say **Last good image**. Provider image capture time may differ from fetch time; identical image hashes preserve a separate last-changed timestamp.
+- Refresh loads the latest published batch; it does not trigger a new capture. Open pages check for a new manifest every 15 minutes. Owners can start a batch from GitHub Actions using **Run workflow**.
+- Images and manifests are deployment artifacts, excluded from Git history. The runtime catalogs and source provenance remain in Git.
+- Ski areas without a public camera retain a website link. Cameras that cannot be captured retain an explicit availability note and official source link.
+
+The collector is `scripts/build_snapshots.py`; `snapshot-sources.json` maps cameras requiring rendered-player capture. `snapshot-manifest.js` is an empty seed in Git and is replaced with the captured manifest during deployment. The public JSON manifest is `snapshots/manifest.json`.
+
+For a local snapshot preview, install `requirements-snapshots.txt`, assemble `_site`, and run `python scripts/build_snapshots.py --output _site --skip-browser`. Serve `_site` with `python -m http.server 4174 --directory _site`. Omit `--skip-browser` in the deployment to include public-player captures.
 
 ## Source integrity and validation
 
 `camera-catalog.js` is the runtime source for both the resort directory and camera list. `source-registry.json` mirrors both lists with a review date and public provenance. Resort sources and HDRelay public camera configurations identify the listed views. No access-controlled or credential-bearing feeds are included.
 
-Run `node --test tests/catalog.test.mjs` to validate statewide coverage, unique identifiers, HTTPS URLs, provider restrictions, CSP compatibility, and source-registry parity. The Pages workflow runs these checks before deploying and publishes only the site assets.
+Run `node --test tests/*.test.mjs` and `python -m unittest discover -s tests -p 'test_*.py'` to validate statewide coverage, unique identifiers, HTTPS URLs, provider restrictions, CSP compatibility, and source-registry parity. The Pages workflow runs these checks before deploying and publishes only the site assets.
 
 Resort snowfall, depth, weather, terrain, and lift totals stay blank until a timestamped source adapter is implemented. Road conditions link to COtrip; camera images do not establish road safety.
 
 ## Current implementation boundary
 
-This first build is a static front end. It does not yet include a server-side provider layer, automated resort-report integration, or CDOT camera/incident feed access. The source registry identifies the checked camera embeds and the outstanding limits for those integrations.
+The front end remains static; scheduled jobs collect and publish camera snapshots. It does not include an unauthenticated capture-trigger API, automated resort-report integration, or CDOT camera/incident feed access. Unavailable providers remain explicitly labeled.

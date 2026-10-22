@@ -1,0 +1,4 @@
+_site/
+snapshots/
+__pycache__/
+.venv/

@@ -1,5 +1,8 @@
 const cameraCatalog = window.powderlineCameraCatalog || [];
 const resortCatalog = window.powderlineResortCatalog || [];
+const snapshotTools = window.powderlineSnapshotTools;
+let snapshotManifest = window.powderlineSnapshots || { cameras: {} };
+const cachedSnapshot = (id) => snapshotTools.valid(id, snapshotManifest.cameras?.[id]) ? snapshotManifest.cameras[id] : null;
 const regions = [...new Set(resortCatalog.map((resort) => resort.region))].map((name) => ({
   name, resorts: resortCatalog.filter((resort) => resort.region === name).map((resort) => resort.name),
 }));
@@ -76,11 +79,15 @@ function createCameraCard(camera, index) {
   card.dataset.directory = String(Boolean(camera.directory));
   card.dataset.provider = camera.provider;
 
+  const snapshot = cachedSnapshot(camera.id);
   const frame = makeElement("div", `camera-frame${camera.provider === "image" ? " image-frame" : " preview-frame"}`);
-  if (camera.provider === "image" || camera.previewSrc) {
+  if (snapshot || camera.provider === "image" || camera.previewSrc) {
     const image = makeElement("img", "live-image");
-    image.src = camera.previewSrc || camera.src;
+    const remoteSource = camera.previewSrc || (camera.provider === "image" ? camera.src : "");
+    image.src = snapshot ? snapshotTools.url(snapshot, document.baseURI) : remoteSource;
     image.dataset.source = image.src;
+    image.dataset.remoteSource = remoteSource;
+    if (snapshot) rememberSnapshot(card, snapshot);
     image.alt = `${camera.resort} ${camera.name} latest available camera image`;
     image.loading = "lazy";
     image.referrerPolicy = "strict-origin-when-cross-origin";
@@ -116,7 +123,7 @@ function createCameraCard(camera, index) {
   }
 
   const fallback = makeElement("div", "camera-fallback");
-  fallback.hidden = camera.provider !== "link";
+  fallback.hidden = camera.provider !== "link" || Boolean(snapshot);
   fallback.append(
     makeElement("strong", "", camera.directory ? "Webcam not available" : "View on resort website"),
     makeElement("p", "", camera.note || "This preview could not be loaded. You can still open the official camera source."),
@@ -127,9 +134,12 @@ function createCameraCard(camera, index) {
   const expand = makeElement("button", "expand-button", "⛶");
   expand.type = "button";
   expand.setAttribute("aria-label", `Expand ${camera.resort} ${camera.name} camera`);
-  if (camera.provider !== "image") expand.hidden = true;
+  if (camera.provider !== "image" && !snapshot) expand.hidden = true;
   frame.append(expand, makeElement("span", "frame-category", camera.kind));
   if (camera.refreshNote) frame.append(makeElement("span", "image-refresh-note", camera.refreshNote));
+  const badge = makeElement("span", "snapshot-badge", "CACHED · HOURLY");
+  badge.hidden = !snapshot;
+  frame.append(badge);
   card.append(frame);
 
   const caption = makeElement("div", "camera-caption");
@@ -145,9 +155,10 @@ function createCameraCard(camera, index) {
   const source = makeElement("div", "camera-source");
   source.append(makeElement("span", "source-dot"));
   const sourceDetails = makeElement("span");
-  if (camera.provider === "image" || camera.previewSrc) {
-    sourceDetails.append(document.createTextNode("IMAGE CHECKED "), makeElement("time", "image-checked", "—"), document.createElement("br"));
-  }
+  const imageStatus = makeElement("span", "image-status");
+  imageStatus.hidden = !(snapshot || camera.provider === "image" || camera.previewSrc);
+  imageStatus.append(makeElement("span", "image-kind", snapshot ? "CACHED IMAGE " : "IMAGE CHECKED "), makeElement("time", "image-checked", "—"), document.createElement("br"));
+  sourceDetails.append(imageStatus);
   sourceDetails.append(makeExternalLink(camera.playerUrl || (camera.provider === "image" ? camera.source : camera.src), camera.provider === "link" ? "OPEN WEBSITE ↗" : camera.provider === "image" ? "OPEN CAM ↗" : "OPEN PLAYER ↗"));
   sourceDetails.append(document.createElement("br"), makeExternalLink(camera.source, "RESORT CAMS ↗"));
   source.append(sourceDetails);
@@ -202,10 +213,8 @@ resortCatalog.filter((resort) => !cameraCatalog.some((camera) => camera.resort =
 });
 
 const resortCount = resortCatalog.length;
-const previewCount = cameraCatalog.filter((camera) => camera.provider !== "link").length;
-const sourceOnlyCount = cameraCatalog.length - previewCount;
 document.querySelector("#camera-summary").textContent = `${cameraCatalog.length} CAMERAS · ${resortCount} COLORADO SKI AREAS`;
-document.querySelector("#brief-lead").textContent = `Explore ${resortCount} Colorado ski areas: ${previewCount} camera views on the wall and ${sourceOnlyCount} cameras on official resort sites. Every ski area stays within reach.`;
+document.querySelector("#brief-lead").textContent = `Explore ${resortCount} Colorado ski areas. Camera snapshots update hourly, with the last successful image kept visible between updates. Browse by region or choose your mountain.`;
 document.querySelector("#report-summary").textContent = `${document.querySelectorAll("#resort-report tbody tr").length} RESORTS · MEASUREMENTS`;
 
 function updateRegionVisibility() {
@@ -223,11 +232,12 @@ function paintClock() {
 function updateFeedCount() {
   const eligible = cameraCards.filter((card) => card.dataset.directory !== "true" && (activeResort === "all" || card.dataset.resort === activeResort));
   const imageReady = eligible.filter((card) => card.querySelector("img.live-image") && card.dataset.ready === "true").length;
-  const sourceOnly = eligible.filter((card) => card.dataset.provider === "link").length;
+  const sourceOnly = eligible.filter((card) => card.dataset.provider === "link" && !card.querySelector("img.live-image")).length;
+  const cached = eligible.filter((card) => card.dataset.snapshotFetchedAt).length;
   const unavailable = eligible.filter((card) => card.dataset.unavailable === "true").length;
   document.querySelector("#feed-count").textContent = `${eligible.length} CAMERAS LISTED`;
   document.querySelector("#feed-detail").textContent = eligible.length
-    ? `${imageReady} images loaded · ${sourceOnly} on resort sites${unavailable ? ` · ${unavailable} previews unavailable` : ""}`
+    ? `${imageReady} images loaded · ${cached} cached${sourceOnly ? ` · ${sourceOnly} source links` : ""}${unavailable ? ` · ${unavailable} previews unavailable` : ""}`
     : "No public webcam found · Ski area website available below";
 }
 
@@ -253,19 +263,49 @@ function markReady(card) {
   updateFeedCount();
 }
 
+function rememberSnapshot(card, entry) {
+  card.dataset.snapshotFetchedAt = entry.fetchedAt;
+  card.dataset.snapshotChangedAt = entry.changedAt || entry.fetchedAt;
+  card.dataset.snapshotStatus = entry.status;
+  card.dataset.snapshotSha = entry.sha256 || entry.fetchedAt;
+}
+
 function setImageCheck(card) {
   const label = card.querySelector(".image-checked");
-  if (label) label.textContent = shortTimeFmt.format(new Date());
+  if (!label) return;
+  if (card.dataset.snapshotFetchedAt) {
+    const entry = { fetchedAt: card.dataset.snapshotFetchedAt, status: card.dataset.snapshotStatus };
+    const stale = snapshotTools.stale(entry);
+    label.textContent = `${snapshotTools.age(entry.fetchedAt)}${stale ? " · Last good image" : ""}`;
+    label.dateTime = entry.fetchedAt;
+    label.title = `Fetched: ${new Date(entry.fetchedAt).toLocaleString()}. Image last changed: ${new Date(card.dataset.snapshotChangedAt).toLocaleString()}. The source’s capture time may differ.`;
+    card.classList.toggle("snapshot-stale", stale);
+    card.querySelector(".image-kind").textContent = "";
+    card.querySelector(".snapshot-badge").hidden = false;
+    const note = card.querySelector(".image-refresh-note");
+    if (note) note.hidden = true;
+  } else {
+    label.textContent = shortTimeFmt.format(new Date());
+  }
 }
 
 function prepareImage(card) {
   const image = card.querySelector("img.live-image");
-  if (!image) return;
+  if (!image || image.dataset.prepared) return;
+  image.dataset.prepared = "true";
   image.addEventListener("load", () => {
     setImageCheck(card);
     markReady(card);
   });
-  image.addEventListener("error", () => showUnavailable(card, "image request failed"));
+  image.addEventListener("error", () => {
+    if (image.dataset.remoteSource && image.dataset.remoteFallback !== "true") {
+      image.dataset.remoteFallback = "true";
+      delete card.dataset.snapshotFetchedAt;
+      card.querySelector(".snapshot-badge").hidden = true;
+      image.src = image.dataset.remoteSource;
+      image.dataset.source = image.src;
+    } else showUnavailable(card, "image request failed");
+  });
   if (image.complete && image.naturalWidth > 0) {
     setImageCheck(card);
     markReady(card);
@@ -280,16 +320,49 @@ function applyResortFilter() {
   });
   updateRegionVisibility();
   updateFeedCount();
+  cameraCards.filter((card) => !card.hidden && cachedSnapshot(card.dataset.cameraId)).forEach((card) => applySnapshot(card, cachedSnapshot(card.dataset.cameraId)));
+}
+
+function applySnapshot(card, entry) {
+  if (card.hidden || !snapshotTools.valid(card.dataset.cameraId, entry)) return Promise.resolve();
+  if (card.dataset.snapshotSha === (entry.sha256 || entry.fetchedAt) && card.dataset.ready === "true") {
+    rememberSnapshot(card, entry);
+    setImageCheck(card);
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const url = snapshotTools.url(entry, document.baseURI);
+    const nextImage = new Image();
+    nextImage.onload = () => {
+      let image = card.querySelector("img.live-image");
+      if (!image) {
+        image = makeElement("img", "live-image");
+        image.alt = `${card.dataset.resort} latest available camera snapshot`;
+        card.querySelector(".camera-frame").prepend(image);
+        prepareImage(card);
+      }
+      rememberSnapshot(card, entry);
+      image.dataset.source = url;
+      image.src = url;
+      card.querySelector(".image-status").hidden = false;
+      card.querySelector(".expand-button").hidden = false;
+      setImageCheck(card);
+      markReady(card);
+      resolve();
+    };
+    // Keep the currently visible image if the next deployment or request fails.
+    nextImage.onerror = resolve;
+    nextImage.src = url;
+  });
 }
 
 function refreshCamera(card) {
-  const frame = card.querySelector("iframe");
+  const snapshot = cachedSnapshot(card.dataset.cameraId);
+  if (snapshot) return applySnapshot(card, snapshot);
   const image = card.querySelector("img.live-image");
-  if (frame && !card.hidden) {
-    frame.src = frame.src;
-  }
-  if (image && !card.hidden) {
-    const url = new URL(image.dataset.source);
+  if (!image || card.hidden) return Promise.resolve();
+  return new Promise((resolve) => {
+    const url = new URL(image.dataset.source, document.baseURI);
     url.searchParams.set("refresh", Date.now());
     const nextImage = new Image();
     nextImage.referrerPolicy = "strict-origin-when-cross-origin";
@@ -297,13 +370,22 @@ function refreshCamera(card) {
       image.src = url.href;
       setImageCheck(card);
       markReady(card);
+      resolve();
     };
-    // If a fresh request fails, keep the last image that loaded successfully.
-    nextImage.onerror = () => {
-      if (card.dataset.ready !== "true") showUnavailable(card, "image request failed");
-    };
+    nextImage.onerror = resolve;
     nextImage.src = url.href;
-  }
+  });
+}
+
+async function refreshWall() {
+  try {
+    const response = await fetch(new URL("./snapshots/manifest.json", document.baseURI), { cache: "no-store" });
+    if (response.ok) {
+      const latest = await response.json();
+      if (latest.cameras && typeof latest.cameras === "object") snapshotManifest = latest;
+    }
+  } catch { /* Local previews or temporary outages keep the current images. */ }
+  await Promise.allSettled(cameraCards.filter((card) => !card.hidden).map(refreshCamera));
   updateFeedCount();
 }
 
@@ -335,21 +417,21 @@ document.querySelectorAll(".expand-button").forEach((button) => {
   });
 });
 
-document.querySelector("#refresh-all").addEventListener("click", (event) => {
+document.querySelector("#refresh-all").addEventListener("click", async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
   button.classList.add("refreshing");
-  cameraCards.filter((card) => !card.hidden).forEach(refreshCamera);
-  window.setTimeout(() => {
+  try { await refreshWall(); }
+  finally {
     button.disabled = false;
     button.classList.remove("refreshing");
-    updateFeedCount();
-  }, 2200);
+  }
 });
 
 paintClock();
 window.setInterval(paintClock, 15000);
+window.setInterval(refreshWall, 15 * 60 * 1000);
 window.setInterval(() => {
-  cameraCards.filter((card) => card.querySelector("img.live-image") && !card.hidden).forEach(refreshCamera);
-}, 5 * 60 * 1000);
+  cameraCards.filter((card) => card.dataset.snapshotFetchedAt).forEach(setImageCheck);
+}, 60 * 1000);
 updateFeedCount();

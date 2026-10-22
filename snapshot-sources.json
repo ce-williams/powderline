@@ -1,0 +1,60 @@
+{
+  "winterpark-snow": {
+    "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
+    "frameMatch": "mXhcYGDptt4PPiSEJVwxPNmUZjj1CNAjSkrBdj3s"
+  },
+  "winterpark-base": {
+    "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
+    "frameMatch": "c909b9be0f94f0d"
+  },
+  "winterpark-lunch": {
+    "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
+    "frameMatch": "FkuQtJjEJaLOpalZiTsiVrZUw5IG3fCjMS3Vcc8h"
+  },
+  "winterpark-snoasis": {
+    "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
+    "frameMatch": "e6H5OSc0NDBQR7KCR0zZnKCV0qqX1YF1b8egwy8x"
+  },
+  "winterpark-tubing": {
+    "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
+    "frameMatch": "8v334V7UDYwodQScLzh63Y6BaqoAQNmj5qhEjsjF"
+  },
+  "telluride-pow-1": {
+    "page": "https://tellurideskiresort.com/cams/",
+    "frameMatch": "/powcam.php",
+    "imageFrame": true
+  },
+  "telluride-pow-2": {
+    "page": "https://tellurideskiresort.com/cams/",
+    "frameMatch": "/powcam2.php",
+    "imageFrame": true
+  },
+  "purgatory-base": {
+    "page": "https://www.purgatory.ski/mountain/mountain-webcams/",
+    "frameMatch": "verkada"
+  },
+  "breckenridge-stake": {
+    "label": "Snow Stake"
+  },
+  "steamboat-mid-snow": {
+    "label": "Mid Mountain Snow Cam"
+  },
+  "steamboat-champagne": {
+    "label": "Champagne Powder\u00ae Snow Cam"
+  },
+  "steamboat-square": {
+    "label": "Steamboat Square Cam"
+  },
+  "steamboat-gondola": {
+    "label": "Steamboat Gondola Cam"
+  },
+  "steamboat-christie": {
+    "label": "Christie Peak Express & Wild Blue GOndola Cam"
+  },
+  "steamboat-four-points": {
+    "label": "Four POints Cam"
+  },
+  "steamboat-thunderhead": {
+    "label": "Thunderhead Cam"
+  }
+}

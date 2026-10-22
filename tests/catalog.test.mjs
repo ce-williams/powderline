@@ -75,7 +75,7 @@ test("restricted and maintenance-only sources remain explicitly accessible", () 
 });
 
 test("every changed browser asset shares the current cache version", () => {
-  const versions = [...html.matchAll(/(?:src|href)="\.\/(?:camera-catalog\.js|app\.js|styles\.css)\?v=([^"\s]+)"/g)].map((match) => match[1]);
-  assert.equal(versions.length, 3);
+  const versions = [...html.matchAll(/(?:src|href)="\.\/(?:camera-catalog\.js|app\.js|styles\.css|snapshot-state\.js|snapshot-manifest\.js)\?v=([^"\s]+)"/g)].map((match) => match[1]);
+  assert.equal(versions.length, 5);
   assert.equal(new Set(versions).size, 1);
 });
