@@ -368,19 +368,32 @@ cameraOnlyButton.addEventListener("click", () => {
   document.body.classList.toggle("camera-only", active);
 });
 
+const imageDialog = makeElement("dialog", "camera-dialog");
+imageDialog.setAttribute("aria-labelledby", "expanded-camera-title");
+const dialogTitle = makeElement("h2");
+dialogTitle.id = "expanded-camera-title";
+const dialogClose = makeElement("button", "dialog-close", "Close image ×");
+dialogClose.type = "button";
+dialogClose.addEventListener("click", () => imageDialog.close());
+const expandedImage = makeElement("img");
+const dialogAge = makeElement("p", "dialog-age");
+imageDialog.append(dialogTitle, dialogClose, expandedImage, dialogAge);
+document.body.append(imageDialog);
+imageDialog.addEventListener("click", (event) => {
+  if (event.target !== imageDialog) return;
+  const bounds = imageDialog.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) imageDialog.close();
+});
 document.querySelectorAll(".expand-button").forEach((button) => {
-  if (window.location.protocol === "file:") {
-    button.hidden = true;
-    return;
-  }
-  button.addEventListener("click", async () => {
-    const frame = button.closest(".camera-frame");
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else await frame.requestFullscreen();
-    } catch {
-      button.setAttribute("aria-label", "Fullscreen is unavailable for this camera");
-    }
+  button.addEventListener("click", () => {
+    const card = button.closest(".camera-panel");
+    const image = card.querySelector("img.live-image");
+    if (!image || !image.naturalWidth) return;
+    dialogTitle.textContent = `${card.dataset.resort} · ${card.querySelector(".camera-name").textContent}`;
+    expandedImage.src = image.currentSrc || image.src;
+    expandedImage.alt = image.alt;
+    dialogAge.textContent = card.querySelector(".image-checked").textContent;
+    imageDialog.showModal();
   });
 });
 

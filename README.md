@@ -58,3 +58,5 @@ The entire published wall was scrolled and visually inspected in Chromium: all 9
 Clicking Sunlight’s in-page player reproduced an unsupported-playback error that covered a valid snapshot. The wall now displays cached images only; optional live sources open separately. No iframe load event is treated as evidence of playable video. Unavailable cameras and ski areas without verified feeds remain listed under expandable regional status sections, which open when that resort is selected.
 
 The Breckenridge snow-stake embed fails on the official resort page, Telluride’s two powder-camera frames return 404, and Steamboat marks Thunderhead down. These are labeled as unavailable rather than counted as working images. Foggy views remain valid camera images.
+
+The expand control uses an accessible in-page image dialog, with Close, Escape, and backdrop dismissal, so denied fullscreen permissions do not break the action.
