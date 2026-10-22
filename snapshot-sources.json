@@ -1,23 +1,33 @@
 {
   "winterpark-snow": {
     "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
-    "frameMatch": "mXhcYGDptt4PPiSEJVwxPNmUZjj1CNAjSkrBdj3s"
+    "frameMatch": "mXhcYGDptt4PPiSEJVwxPNmUZjj1CNAjSkrBdj3s",
+    "snapshotUrl": "https://i.ytimg.com/vi/yj-5Q1vBMaA/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview"
   },
   "winterpark-base": {
     "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
-    "frameMatch": "c909b9be0f94f0d"
+    "frameMatch": "c909b9be0f94f0d",
+    "snapshotUrl": "https://i.ytimg.com/vi/vyWAzJAWv4w/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview"
   },
   "winterpark-lunch": {
     "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
-    "frameMatch": "FkuQtJjEJaLOpalZiTsiVrZUw5IG3fCjMS3Vcc8h"
+    "frameMatch": "FkuQtJjEJaLOpalZiTsiVrZUw5IG3fCjMS3Vcc8h",
+    "snapshotUrl": "https://i.ytimg.com/vi/HfX4H3MSwXs/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview"
   },
   "winterpark-snoasis": {
     "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
-    "frameMatch": "e6H5OSc0NDBQR7KCR0zZnKCV0qqX1YF1b8egwy8x"
+    "frameMatch": "e6H5OSc0NDBQR7KCR0zZnKCV0qqX1YF1b8egwy8x",
+    "snapshotUrl": "https://i.ytimg.com/vi/Dt_WhmxV0yE/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview"
   },
   "winterpark-tubing": {
     "page": "https://www.winterparkresort.com/the-mountain/mountain-cams",
-    "frameMatch": "8v334V7UDYwodQScLzh63Y6BaqoAQNmj5qhEjsjF"
+    "frameMatch": "8v334V7UDYwodQScLzh63Y6BaqoAQNmj5qhEjsjF",
+    "snapshotUrl": "https://i.ytimg.com/vi/jGS0j-viJmM/maxresdefault_live.jpg",
+    "snapshotKind": "provider-preview"
   },
   "telluride-pow-1": {
     "page": "https://tellurideskiresort.com/cams/",

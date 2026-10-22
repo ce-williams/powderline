@@ -64,6 +64,16 @@ class SnapshotTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     snapshots.retain_snapshot(output, "test-cam", previous)
 
+    def test_provider_preview_is_usable_without_claiming_a_rendered_video_frame(self):
+        with tempfile.TemporaryDirectory() as directory:
+            camera = {"id": "test-cam", "provider": "link", "src": "https://example.com/cameras"}
+            config = {"snapshotUrl": "https://example.com/preview.jpg", "snapshotKind": "provider-preview"}
+            with patch.object(snapshots, "download", return_value=camera_image()):
+                camera_id, entry = snapshots.capture_image(camera, Path(directory), {}, config)
+            self.assertEqual(camera_id, "test-cam")
+            self.assertEqual(entry["method"], "provider-preview")
+            self.assertTrue((Path(directory) / entry["file"]).exists())
+
     def test_manifest_cannot_supply_arbitrary_paths_or_authenticated_urls(self):
         self.assertFalse(snapshots.valid_entry("test-cam", {"file": "../private.jpg", "fetchedAt": "2026-10-21T10:00:00Z"}))
         for url in ["http://example.com/cam", "https://user:secret@example.com/cam"]:

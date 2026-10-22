@@ -99,12 +99,13 @@ def load_previous(previous_site=SITE_URL):
         return {}
 
 
-def capture_image(camera, output, previous):
-    source = camera.get("previewSrc") or (camera["src"] if camera["provider"] == "image" else None)
+def capture_image(camera, output, previous, config=None):
+    config = config or {}
+    source = camera.get("previewSrc") or (camera["src"] if camera["provider"] == "image" else config.get("snapshotUrl"))
     if not source:
         return camera["id"], None
     try:
-        return camera["id"], write_snapshot(output, camera["id"], download(source), previous.get(camera["id"]))
+        return camera["id"], write_snapshot(output, camera["id"], download(source), previous.get(camera["id"]), method=config.get("snapshotKind", "source-image"))
     except Exception:
         return camera["id"], None
 
@@ -128,17 +129,17 @@ def main():
     root = Path(__file__).resolve().parents[1]
     cameras = json.loads((root / "source-registry.json").read_text())["cameras"]
     previous = load_previous()
+    configs = json.loads((root / "snapshot-sources.json").read_text())
     args.output.mkdir(parents=True, exist_ok=True)
     entries = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-        for camera_id, entry in pool.map(lambda camera: capture_image(camera, args.output, previous), cameras):
+        for camera_id, entry in pool.map(lambda camera: capture_image(camera, args.output, previous, configs.get(camera["id"])), cameras):
             if entry:
                 entries[camera_id] = entry
     print(f"Fetched {len(entries)} source images", flush=True)
     if not args.skip_browser:
         try:
             from capture_players import capture_players
-            configs = json.loads((root / "snapshot-sources.json").read_text())
             pending = [camera for camera in cameras if camera["id"] not in entries]
             entries.update(capture_players(pending, configs, args.output, previous))
         except Exception as error:

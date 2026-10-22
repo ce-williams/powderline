@@ -26,6 +26,7 @@ The app is plain HTML, CSS, and JavaScript, with relative asset paths so it work
 The directory covers **34 Colorado ski areas**, grouped by geography. GitHub Actions captures images at **17 minutes past each hour**, and on pushes or manual workflow runs. Scheduled runs can be delayed by GitHub. No new hosting account or API key is needed.
 
 - The site serves captured JPEGs from its own `snapshots/` directory, immediately when a tile is visible. Video players remain optional.
+- Winter Park uses its camera-specific public video preview images, labeled **Source preview**. These are provider thumbnails, not a guarantee of a current live frame.
 - Source image endpoints are preferred. Public player pages are used for cameras without a snapshot endpoint, capturing only ready video elements or explicitly configured camera images. Browser challenges, login screens, and error pages are never captured as cameras.
 - A failed source refresh downloads and preserves the last-good image from the previous public deployment. The original fetch timestamp stays unchanged. A zero-image batch aborts publication.
 - Tiles show **Fetched … ago**. Failed refreshes or images older than two hours say **Last good image**. Provider image capture time may differ from fetch time; identical image hashes preserve a separate last-changed timestamp.

@@ -268,6 +268,7 @@ function rememberSnapshot(card, entry) {
   card.dataset.snapshotChangedAt = entry.changedAt || entry.fetchedAt;
   card.dataset.snapshotStatus = entry.status;
   card.dataset.snapshotSha = entry.sha256 || entry.fetchedAt;
+  card.dataset.snapshotMethod = entry.method;
 }
 
 function setImageCheck(card) {
@@ -282,6 +283,7 @@ function setImageCheck(card) {
     card.classList.toggle("snapshot-stale", stale);
     card.querySelector(".image-kind").textContent = "";
     card.querySelector(".snapshot-badge").hidden = false;
+    card.querySelector(".snapshot-badge").textContent = card.dataset.snapshotMethod === "provider-preview" ? "SOURCE PREVIEW · HOURLY" : "CACHED · HOURLY";
     const note = card.querySelector(".image-refresh-note");
     if (note) note.hidden = true;
   } else {
