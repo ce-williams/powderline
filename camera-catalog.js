@@ -789,7 +789,8 @@ window.powderlineCameraCatalog = [
     "source": "https://tellurideskiresort.com/webcams/",
     "playerUrl": "https://tellurideskiresort.roundshot.com/",
     "refreshNote": "LATEST SOURCE IMAGE",
-    "reviewedOn": "2026-10-21"
+    "reviewedOn": "2026-10-22",
+    "note": "The official viewer reports this camera offline and displays archived imagery dated April 11, 2026. The archive is excluded from current camera images."
   },
   {
     "id": "aspen-snow-stake",

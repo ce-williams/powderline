@@ -94,5 +94,8 @@
   "sunlight-stake": {
     "snapshotUrl": "https://s106.ipcamlive.com/streams/6axfhgqtmlvvk1b8c/snapshot.jpg",
     "snapshotKind": "source-image"
+  },
+  "telluride-revelation": {
+    "disabledReason": "Official panorama viewer reports CAMERA OFFLINE and displays an April 11, 2026 archive. Re-enable after a source review confirms current images."
   }
 }

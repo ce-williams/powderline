@@ -83,6 +83,12 @@ class SnapshotTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     snapshots.retain_snapshot(output, "test-cam", previous)
 
+    def test_confirmed_offline_archive_is_not_fetched_as_a_current_camera(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(snapshots, "download") as fetch:
+            camera = {"id":"archive-cam","provider":"image","src":"https://example.com/archive.jpg"}
+            self.assertEqual(snapshots.capture_image(camera, Path(directory), {}, {"disabledReason":"Provider reports offline"}), ("archive-cam", None))
+            fetch.assert_not_called()
+
     def test_provider_preview_is_usable_without_claiming_a_rendered_video_frame(self):
         with tempfile.TemporaryDirectory() as directory:
             camera = {"id": "test-cam", "provider": "link", "src": "https://example.com/cameras"}

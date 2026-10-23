@@ -64,3 +64,5 @@ The expand control uses an accessible in-page image dialog, with Close, Escape, 
 ### Freshness follow-up — 2026-10-22
 
 The hourly GitHub scheduler left a gap exceeding four hours between the last published batch and the live check. Collections now request two runs per hour, at minutes 13 and 43, and the UI describes this as best-effort. A batch older than 90 minutes displays an overdue banner. The page checks the published manifest on opening, returning to the tab, every five minutes, and manual Refresh. Provider previews explicitly show that capture time is unknown; images that have not changed for more than two hours carry an unchanged-source label. Refresh cannot force a source camera to update or trigger GitHub from this public static page.
+
+A direct browser source check also found Telluride Revelation Bowl explicitly offline, with an April 11, 2026 archive in its public viewer. Its collection and retention are disabled until a source review confirms current imagery. Loveland Lift 9’s unchanged public still remains labeled with its unchanged age.

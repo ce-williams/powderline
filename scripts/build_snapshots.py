@@ -107,6 +107,8 @@ def load_previous(previous_site=SITE_URL):
 
 def capture_image(camera, output, previous, config=None):
     config = config or {}
+    if config.get("disabledReason"):
+        return camera["id"], None
     source = camera.get("previewSrc") or (camera["src"] if camera["provider"] == "image" else config.get("snapshotUrl"))
     if not source:
         return camera["id"], None
@@ -146,13 +148,17 @@ def main():
     if not args.skip_browser:
         try:
             from capture_players import capture_players
-            pending = [camera for camera in cameras if camera["id"] not in entries]
+            pending = [camera for camera in cameras if camera["id"] not in entries and not configs.get(camera["id"], {}).get("disabledReason")]
             entries.update(capture_players(pending, configs, args.output, previous))
         except Exception as error:
             print(f"Player capture unavailable ({type(error).__name__}); retaining previous images", flush=True)
     for camera in cameras:
         camera_id = camera["id"]
         if camera_id in entries:
+            continue
+        disabled_reason = configs.get(camera_id, {}).get("disabledReason")
+        if disabled_reason:
+            entries[camera_id] = {"status": "unavailable", "lastAttemptAt": now(), "reason": disabled_reason}
             continue
         try:
             entries[camera_id] = retain_snapshot(args.output, camera_id, previous.get(camera_id))
