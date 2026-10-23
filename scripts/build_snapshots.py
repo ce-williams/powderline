@@ -117,7 +117,7 @@ def capture_image(camera, output, previous, config=None):
 
 
 def write_manifest(output, cameras, entries):
-    manifest = {"generatedAt": now(), "refreshIntervalMinutes": 60, "cameras": entries,
+    manifest = {"generatedAt": now(), "refreshIntervalMinutes": 30, "cameras": entries,
                 "summary": {"totalCameras": len(cameras), "available": sum(bool(e.get("file")) for e in entries.values()),
                             "updated": sum(e["status"] == "ok" for e in entries.values()),
                             "retained": sum(e["status"] == "retained" for e in entries.values())}}

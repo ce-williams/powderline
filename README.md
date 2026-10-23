@@ -60,3 +60,7 @@ Clicking Sunlight’s in-page player reproduced an unsupported-playback error th
 The Breckenridge snow-stake embed fails on the official resort page, Telluride’s two powder-camera frames return 404, and Steamboat marks Thunderhead down. These are labeled as unavailable rather than counted as working images. Foggy views remain valid camera images.
 
 The expand control uses an accessible in-page image dialog, with Close, Escape, and backdrop dismissal, so denied fullscreen permissions do not break the action.
+
+### Freshness follow-up — 2026-10-22
+
+The hourly GitHub scheduler left a gap exceeding four hours between the last published batch and the live check. Collections now request two runs per hour, at minutes 13 and 43, and the UI describes this as best-effort. A batch older than 90 minutes displays an overdue banner. The page checks the published manifest on opening, returning to the tab, every five minutes, and manual Refresh. Provider previews explicitly show that capture time is unknown; images that have not changed for more than two hours carry an unchanged-source label. Refresh cannot force a source camera to update or trigger GitHub from this public static page.

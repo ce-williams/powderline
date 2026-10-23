@@ -28,3 +28,11 @@ test("retained or overdue snapshots are marked stale without changing their age"
 test("snapshot requests stay under the GitHub Pages repository path", () => {
   assert.equal(tools.url(entry,"https://example.github.io/powderline/"), "https://example.github.io/powderline/snapshots/test-cam.jpg?v=abc");
 });
+
+test("overdue batches and unchanged images are not presented as current conditions", () => {
+  assert.equal(tools.batchDelayed({generatedAt:entry.fetchedAt}, at("11:00")), false);
+  assert.equal(tools.batchDelayed({generatedAt:entry.fetchedAt}, at("11:31")), true);
+  assert.equal(tools.batchDelayed({}, at("11:00")), true);
+  assert.equal(tools.unchanged({...entry,changedAt:entry.fetchedAt},at("13:00")), "");
+  assert.equal(tools.unchanged({...entry,fetchedAt:"2026-10-21T13:00:00Z",changedAt:entry.fetchedAt},at("13:00")), "Source unchanged for 3h");
+});

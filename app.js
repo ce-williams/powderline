@@ -67,7 +67,8 @@ function createCameraCard(camera, index) {
     image.dataset.source = image.src;
     rememberSnapshot(card, snapshot);
     image.alt = `${camera.resort} ${camera.name} latest available camera image`;
-    image.loading = "lazy";
+    image.loading = index < 6 ? "eager" : "lazy";
+    image.decoding = "async";
     frame.append(image);
   }
 
@@ -86,7 +87,7 @@ function createCameraCard(camera, index) {
   if (!snapshot) expand.hidden = true;
   frame.append(expand, makeElement("span", "frame-category", camera.kind));
   if (camera.refreshNote) frame.append(makeElement("span", "image-refresh-note", camera.refreshNote));
-  const badge = makeElement("span", "snapshot-badge", "CACHED · HOURLY");
+  const badge = makeElement("span", "snapshot-badge", "CACHED IMAGE");
   badge.hidden = !snapshot;
   frame.append(badge);
   card.append(frame);
@@ -170,8 +171,16 @@ resortCatalog.filter((resort) => !cameraCatalog.some((camera) => camera.resort =
 
 const resortCount = resortCatalog.length;
 document.querySelector("#camera-summary").textContent = `${cameraCatalog.length} CAMERAS · ${resortCount} COLORADO SKI AREAS`;
-document.querySelector("#brief-lead").textContent = `Explore ${resortCount} Colorado ski areas. Camera snapshots update hourly, with the last successful image kept visible between updates. Browse by region or choose your mountain.`;
+document.querySelector("#brief-lead").textContent = `Explore ${resortCount} Colorado ski areas. Snapshot updates are requested every 30 minutes; scheduling and source delays can make images older. Browse by region or choose your mountain.`;
 document.querySelector("#report-summary").textContent = `${document.querySelectorAll("#resort-report tbody tr").length} RESORTS · MEASUREMENTS`;
+
+function updateBatchStatus() {
+  const status = document.querySelector("#snapshot-batch-status");
+  const delayed = snapshotTools.batchDelayed(snapshotManifest);
+  status.classList.toggle("batch-delayed", delayed);
+  const age = snapshotManifest.generatedAt ? snapshotTools.age(snapshotManifest.generatedAt).replace("Fetched", "collected") : "collection time unavailable";
+  status.textContent = `${delayed ? "UPDATES DELAYED" : "LATEST COLLECTION"} · ${age}. ${delayed ? "Showing saved images. The scheduled collection is overdue." : "Updates requested every 30 minutes."} Source capture times can be older. Refresh checks the published batch.`;
+}
 
 function updateRegionVisibility() {
   cameraCards.forEach((card) => {
@@ -245,15 +254,16 @@ function setImageCheck(card) {
   const label = card.querySelector(".image-checked");
   if (!label) return;
   if (card.dataset.snapshotFetchedAt) {
-    const entry = { fetchedAt: card.dataset.snapshotFetchedAt, status: card.dataset.snapshotStatus };
+    const entry = { fetchedAt: card.dataset.snapshotFetchedAt, changedAt: card.dataset.snapshotChangedAt, status: card.dataset.snapshotStatus };
     const stale = snapshotTools.stale(entry);
-    label.textContent = `${snapshotTools.age(entry.fetchedAt)}${stale ? " · Last good image" : ""}`;
+    const unchanged = snapshotTools.unchanged(entry);
+    label.textContent = `${snapshotTools.age(entry.fetchedAt)}${stale ? " · Last good image" : ""}${unchanged ? ` · ${unchanged}` : ""}`;
     label.dateTime = entry.fetchedAt;
     label.title = `Fetched: ${new Date(entry.fetchedAt).toLocaleString()}. Image last changed: ${new Date(card.dataset.snapshotChangedAt).toLocaleString()}. The source’s capture time may differ.`;
-    card.classList.toggle("snapshot-stale", stale);
+    card.classList.toggle("snapshot-stale", stale || Boolean(unchanged));
     card.querySelector(".image-kind").textContent = "";
     card.querySelector(".snapshot-badge").hidden = false;
-    card.querySelector(".snapshot-badge").textContent = card.dataset.snapshotMethod === "provider-preview" ? "SOURCE PREVIEW · HOURLY" : "CACHED · HOURLY";
+    card.querySelector(".snapshot-badge").textContent = card.dataset.snapshotMethod === "provider-preview" ? "PREVIEW · CAPTURE TIME UNKNOWN" : "CACHED IMAGE";
     const note = card.querySelector(".image-refresh-note");
     if (note) note.hidden = true;
   } else {
@@ -337,7 +347,7 @@ function refreshCamera(card) {
   return Promise.resolve();
 }
 
-async function refreshWall() {
+async function refreshWall({ visibleOnly = false } = {}) {
   try {
     const response = await fetch(new URL("./snapshots/manifest.json", document.baseURI), { cache: "no-store" });
     if (response.ok) {
@@ -349,8 +359,14 @@ async function refreshWall() {
       }
     }
   } catch { /* Local previews or temporary outages keep the current images. */ }
-  await Promise.allSettled(cameraCards.filter((card) => !card.hidden).map(refreshCamera));
+  const targets = cameraCards.filter((card) => {
+    if (card.hidden) return false;
+    const bounds = card.getBoundingClientRect();
+    return !visibleOnly || (bounds.bottom >= 0 && bounds.top < window.innerHeight + 720);
+  });
+  await Promise.allSettled(targets.map(refreshCamera));
   updateRegionVisibility();
+  updateBatchStatus();
   updateFeedCount();
 }
 
@@ -408,10 +424,21 @@ document.querySelector("#refresh-all").addEventListener("click", async (event) =
   }
 });
 
+const visibleImages = new IntersectionObserver((entries) => {
+  entries.filter((entry) => entry.isIntersecting).forEach(({ target }) => {
+    const snapshot = cachedSnapshot(target.dataset.cameraId);
+    if (snapshot) applySnapshot(target, snapshot);
+  });
+}, { rootMargin: "720px" });
+cameraCards.forEach((card) => visibleImages.observe(card));
+
 paintClock();
 window.setInterval(paintClock, 15000);
-window.setInterval(refreshWall, 15 * 60 * 1000);
+window.setInterval(() => refreshWall({ visibleOnly: true }), 5 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshWall({ visibleOnly: true }); });
+refreshWall({ visibleOnly: true });
 window.setInterval(() => {
   cameraCards.filter((card) => card.dataset.snapshotFetchedAt).forEach(setImageCheck);
+  updateBatchStatus();
 }, 60 * 1000);
 updateFeedCount();

@@ -331,3 +331,6 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
 .camera-dialog > img { display: block; width: 100%; max-height: 75vh; object-fit: contain; }
 .dialog-close { position: absolute; top: 14px; right: 14px; background: transparent; border: 1px solid var(--line); color: var(--ice); padding: 8px; }
 .dialog-age { margin: 12px 0 0; color: var(--paper-dim); font: 11px var(--mono); }
+
+.snapshot-batch-status { margin: 0 0 18px; padding: 12px; border: 1px solid var(--line); color: var(--paper-dim); font: 11px/1.6 var(--mono); }
+.snapshot-batch-status.batch-delayed { color: var(--orange); border-color: var(--orange); }
