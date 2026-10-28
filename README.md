@@ -66,3 +66,9 @@ The expand control uses an accessible in-page image dialog, with Close, Escape, 
 The hourly GitHub scheduler left a gap exceeding four hours between the last published batch and the live check. Collections now request two runs per hour, at minutes 13 and 43, and the UI describes this as best-effort. A batch older than 90 minutes displays an overdue banner. The page checks the published manifest on opening, returning to the tab, every five minutes, and manual Refresh. Provider previews explicitly show that capture time is unknown; images that have not changed for more than two hours carry an unchanged-source label. Refresh cannot force a source camera to update or trigger GitHub from this public static page.
 
 A direct browser source check also found Telluride Revelation Bowl explicitly offline, with an April 11, 2026 archive in its public viewer. Its collection and retention are disabled until a source review confirms current imagery. Loveland Lift 9’s unchanged public still remains labeled with its unchanged age.
+
+### Independent freshness watchdog — 2026-10-28
+
+GitHub scheduled runs continued to arrive 5–6 hours apart despite the 30-minute request. `python3 -B scripts/check_feed_freshness.py` reports the published batch's age and the current Pages workflow state. Add `--refresh` to dispatch the existing workflow when the batch is older than 40 minutes and no build is active. It uses existing `gh` authentication, never stores credentials, and reports builds older than 20 minutes as stalled instead of piling up duplicate jobs.
+
+An active app heartbeat named **Powderline feed freshness watchdog** checks every 30 minutes in the original project chat. It verifies recovery after dispatch and reports failures. This backup requires the local computer and app to stay running; the GitHub schedule remains enabled when the local backup is unavailable. A server-hosted independent scheduler is still needed for an always-on freshness guarantee.
