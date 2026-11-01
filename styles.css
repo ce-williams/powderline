@@ -334,3 +334,20 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
 
 .snapshot-batch-status { margin: 0 0 18px; padding: 12px; border: 1px solid var(--line); color: var(--paper-dim); font: 11px/1.6 var(--mono); }
 .snapshot-batch-status.batch-delayed { color: var(--orange); border-color: var(--orange); }
+
+/* Resort measurements live with each camera, including the compact camera view. */
+.snow-stats { padding: 11px 12px 10px; border-top: 1px solid #2d3c3b; background: #101c1c; }
+.snow-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.snow-metric + .snow-metric { border-left: 1px solid #2d3c3b; padding-left: 12px; }
+.snow-metric dt { color: var(--quiet); font: 9px/1.4 var(--mono); letter-spacing: .08em; }
+.snow-metric dd { margin: 3px 0 0; color: var(--ice); font: 500 22px/1.2 var(--mono); }
+.snow-report-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 9px; color: var(--quiet); font: 10px/1.5 var(--sans); }
+.snow-report-meta a { margin-left: auto; color: var(--ice-deep); text-decoration: underline; text-underline-offset: 3px; }
+.snow-report-old .snow-report-meta time, tr.snow-report-old .report-table-time { color: #e2bc7c; }
+.report-table-time { display: block; margin-top: 5px; color: var(--quiet); font: 10px/1.4 var(--sans); }
+@media (max-width: 600px) {
+  .snow-stats { padding: 12px 10px; }
+  .snow-metric dt { font-size: 10px; }
+  .snow-report-meta { font-size: 11px; }
+  .snow-report-meta a { padding: 6px 0; }
+}

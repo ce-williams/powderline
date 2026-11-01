@@ -7,7 +7,7 @@
     <meta name="description" content="A live field view of Colorado mountain cameras, snow reports, and I-70 travel conditions." />
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://*.brownrice.com https://cache.snow.com https://dirigo-resorts-f4e2bde5azc2cne6.z02.azurefd.net https://watch.hdrelay.io https://img.hdrelay.com https://manage.hdrelay.com https://cams.skiloveland.com https://*.ipcamlive.com https://backend.roundshot.com https://*.roundshot.com https://webcam.io https://*.webcam.io; frame-src https://player.brownrice.com https://*.ipcamlive.com https://skicooper.com:8443; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <title>POWDERLINE — Colorado mountain intelligence</title>
-    <link rel="stylesheet" href="./styles.css?v=freshness-7" />
+    <link rel="stylesheet" href="./styles.css?v=snow-stats-8" />
   </head>
   <body>
     <div class="app-shell">
@@ -33,7 +33,7 @@
         <section class="instrument-strip" aria-label="Statewide conditions summary">
           <div class="strip-heading"><span class="signal-dot"></span><span>FIELD CONDITIONS</span><span class="strip-date" id="mountain-date"></span></div>
           <div class="strip-readings">
-            <div class="strip-reading"><span class="reading-label">STATEWIDE NEW SNOW</span><strong>— <small>in</small></strong><em>Reports unavailable</em></div>
+            <div class="strip-reading"><span class="reading-label">SNOW REPORT COVERAGE</span><strong id="snow-coverage">Loading reports</strong><em>Resort reporting times vary</em></div>
             <div class="strip-reading"><span class="reading-label">I–70 MOUNTAIN</span><strong class="road-neutral"><span class="road-mark"></span> CHECK COtrip</strong><em>Official status source</em></div>
             <div class="strip-reading source-read"><span class="reading-label">CAMERA STATUS</span><strong id="feed-count">Loading camera list</strong><em id="feed-detail">Video playback varies by resort</em></div>
           </div>
@@ -46,8 +46,8 @@
             <h1 id="brief-title">See the mountain.<br /><span>Read the day.</span></h1>
             <div class="brief-copy">
               <p class="brief-lead" id="brief-lead">Resort cameras across Colorado. Direct views from the official sources. No invented snow totals.</p>
-              <p class="brief-detail">Resort snowfall and operations reports are not connected yet. Use the official mountain reports below for current measurements; camera views come from source feeds.</p>
-              <div class="brief-stamps"><span><b class="stamp-icon">◉</b> LIVE CAMS VERIFY AT SOURCE</span><span><b class="stamp-icon muted">≋</b> SNOW REPORTS NOT CONNECTED</span></div>
+              <p class="brief-detail">Snow report stats appear beneath each camera. Reports refresh with the camera batch; each resort sets its own reporting time.</p>
+              <div class="brief-stamps"><span><b class="stamp-icon">◉</b> LIVE CAMS VERIFY AT SOURCE</span><span><b class="stamp-icon muted">≋</b> RESORT SNOW REPORTS</span></div>
             </div>
           </div>
         </section>
@@ -69,23 +69,14 @@
 
         <section class="lower-grid" id="resort-report">
           <div class="report-section">
-            <div class="section-heading compact-heading"><div class="heading-left"><span class="section-index">03</span><div><div class="eyebrow" id="report-summary">RESORT MEASUREMENTS</div><h2>Resort report</h2></div></div><span class="report-tag">NO LIVE DATA FEED</span></div>
+            <div class="section-heading compact-heading"><div class="heading-left"><span class="section-index">03</span><div><div class="eyebrow" id="report-summary">RESORT MEASUREMENTS</div><h2>Resort report</h2></div></div><span class="report-tag">RESORT-REPORTED</span></div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>RESORT</th><th>24 H</th><th>48 H</th><th>7 DAY</th><th>REPORT</th></tr></thead>
-                <tbody>
-                  <tr><th scope="row">Arapahoe Basin</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.arapahoebasin.com/snow-report/" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Keystone</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.keystoneresort.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Breckenridge</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.breckenridge.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Copper Mountain</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.coppercolorado.com/the-mountain/conditions-weather/snow-report/" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Vail</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.vail.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Beaver Creek</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.beavercreek.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Loveland</th><td>—</td><td>—</td><td>—</td><td><a href="https://skiloveland.com/snow-report/" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                  <tr><th scope="row">Crested Butte</th><td>—</td><td>—</td><td>—</td><td><a href="https://www.skicb.com/the-mountain/mountain-conditions/weather-report.aspx" target="_blank" rel="noopener noreferrer">Official report ↗</a></td></tr>
-                </tbody>
+                <thead><tr><th>RESORT</th><th>24 H</th><th>48 H</th><th>7 DAY</th><th>DEPTH</th><th>REPORT</th></tr></thead>
+                <tbody></tbody>
               </table>
             </div>
-            <div class="report-note"><span class="note-rule"></span><p>Snowfall, depth, temperature, and terrain values are left blank until a timestamped resort source is connected. The official report is one click away.</p></div>
+            <div class="report-note"><span class="note-rule"></span><p>Measurements are in inches. Depth is base or mid-mountain, as labeled in each tile. Older reports are marked; — means no dated measurement is available. Collection time and resort reporting time can differ.</p></div>
           </div>
 
           <aside class="road-section" id="road-intel">
@@ -140,9 +131,11 @@
 
       <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>POWDER<span class="brand-light">LINE</span></span></a><span>COLORADO MOUNTAIN INTELLIGENCE</span><span>CAMERAS ARE VISUAL OBSERVATIONS · CHECK OFFICIAL SOURCES FOR CONDITIONS</span></footer>
     </div>
-    <script src="./camera-catalog.js?v=freshness-7"></script>
-    <script src="./snapshot-state.js?v=freshness-7"></script>
-    <script src="./snapshot-manifest.js?v=freshness-7"></script>
-    <script src="./app.js?v=freshness-7"></script>
+    <script src="./camera-catalog.js?v=snow-stats-8"></script>
+    <script src="./snapshot-state.js?v=snow-stats-8"></script>
+    <script src="./snapshot-manifest.js?v=snow-stats-8"></script>
+    <script src="./snow-report-state.js?v=snow-stats-8"></script>
+    <script src="./snow-reports.js?v=snow-stats-8"></script>
+    <script src="./app.js?v=snow-stats-8"></script>
   </body>
 </html>

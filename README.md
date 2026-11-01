@@ -45,11 +45,11 @@ For a local snapshot preview, install `requirements-snapshots.txt`, assemble `_s
 
 Run `node --test tests/*.test.mjs` and `python -m unittest discover -s tests -p 'test_*.py'` to validate statewide coverage, unique identifiers, HTTPS URLs, provider restrictions, CSP compatibility, and source-registry parity. The Pages workflow runs these checks before deploying and publishes only the site assets.
 
-Resort snowfall, depth, weather, terrain, and lift totals stay blank until a timestamped source adapter is implemented. Road conditions link to COtrip; camera images do not establish road safety.
+Each camera tile shows resort-reported 24-hour, 48-hour, seven-day snowfall and base or mid-mountain depth in inches, plus lifts open when supplied. `scripts/build_snow_reports.py` collects the public Colorado Ski Country USA JSON feed and public Vail, Beaver Creek, Breckenridge, Keystone, and Crested Butte report pages in the same Pages build. Measurements require a source reporting timestamp; missing/trace values stay blank and numeric zero stays zero. Reports older than 36 hours are marked; measurements older than seven days are hidden. Closed areas without dated measurements show an explicit awaiting-report state. Source failures retain the prior report for up to seven days without changing its timestamps. Successful empty reports clear prior measurements. Reports are served from same-origin `snow-reports.json` with a generated JS seed and refresh with the camera wall. Road conditions link to COtrip; camera images do not establish road safety.
 
 ## Current implementation boundary
 
-The front end remains static; scheduled jobs collect and publish camera snapshots. It does not include an unauthenticated capture-trigger API, automated resort-report integration, or CDOT camera/incident feed access. Unavailable providers remain explicitly labeled.
+The front end remains static; scheduled jobs collect and publish camera snapshots. It does not include an unauthenticated capture-trigger API, CDOT camera/incident feed access. Unavailable providers remain explicitly labeled.
 
 ### Browser QA — 2026-10-22
 

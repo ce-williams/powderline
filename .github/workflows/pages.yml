@@ -46,9 +46,11 @@ jobs:
       - name: Assemble public site
         run: |
           mkdir _site
-          cp index.html styles.css app.js camera-catalog.js source-registry.json snapshot-state.js snapshot-manifest.js LICENSE _site/
+          cp index.html styles.css app.js camera-catalog.js source-registry.json snapshot-state.js snapshot-manifest.js snow-report-state.js snow-reports.js LICENSE _site/
       - name: Collect camera snapshots and retain last-good images
         run: python scripts/build_snapshots.py --output _site
+      - name: Collect resort snow reports
+        run: python scripts/build_snow_reports.py --output _site
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files

@@ -1,6 +1,8 @@
 const cameraCatalog = window.powderlineCameraCatalog || [];
 const resortCatalog = window.powderlineResortCatalog || [];
 const snapshotTools = window.powderlineSnapshotTools;
+const snowTools = window.powderlineSnowTools;
+let snowReports = window.powderlineSnowReports || { resorts: {} };
 let snapshotManifest = window.powderlineSnapshots || { cameras: {} };
 const cachedSnapshot = (id) => snapshotTools.valid(id, snapshotManifest.cameras?.[id]) ? snapshotManifest.cameras[id] : null;
 const regions = [...new Set(resortCatalog.map((resort) => resort.region))].map((name) => ({
@@ -114,7 +116,77 @@ function createCameraCard(camera, index) {
   source.append(sourceDetails);
   caption.append(source);
   card.append(caption);
+  card.append(createSnowStats(camera.resort));
   return card;
+}
+
+function reportTimestamp(report) {
+  if (report?.unavailable) return "Snow report unavailable";
+  if (!report?.reportedAt || !Number.isFinite(Date.parse(report.reportedAt))) return "Awaiting a dated report";
+  const date = new Date(report.reportedAt);
+  const stamp = new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(date);
+  return `${snowTools.stale(report) ? "Older report · " : "Reported "}${stamp}${report.retained ? " · Saved report" : ""}`;
+}
+
+function createSnowStats(resort) {
+  const report = snowReports.resorts?.[resort];
+  const section = makeElement("section", "snow-stats");
+  section.setAttribute("aria-label", `${resort} snow report`);
+  section.classList.toggle("snow-report-old", snowTools.stale(report));
+  const metrics = makeElement("dl", "snow-metrics");
+  const depthLabel = report?.depthLabel === "MID-MTN" ? "MID-MTN" : "BASE";
+  for (const [label, field] of [["24 H", "snow24"], ["48 H", "snow48"], ["7 DAY", "snow7"], [depthLabel, "depth"]]) {
+    const metric = makeElement("div", "snow-metric");
+    metric.append(makeElement("dt", "", label), makeElement("dd", "", snowTools.value(report, field)));
+    metrics.append(metric);
+  }
+  section.append(metrics);
+  const meta = makeElement("div", "snow-report-meta");
+  const time = makeElement("time", "", reportTimestamp(report));
+  if (report?.reportedAt) time.dateTime = report.reportedAt;
+  meta.append(time);
+  if (snowTools.value(report, "liftsOpen") !== "—") {
+    const total = snowTools.value(report, "liftsTotal");
+    meta.append(makeElement("span", "snow-lifts", `${snowTools.value(report, "liftsOpen")}${total !== "—" ? `/${total}` : ""} lifts open`));
+  }
+  const source = makeExternalLink(report?.source || resortCatalog.find((r) => r.name === resort)?.source, report?.unavailable ? "Resort website ↗" : "Snow report ↗");
+  source.title = report?.sourceName || "Resort website";
+  meta.append(source);
+  section.append(meta);
+  return section;
+}
+
+function renderSnowReports() {
+  cameraCards.forEach((card) => card.querySelector(".snow-stats").replaceWith(createSnowStats(card.dataset.resort)));
+  const body = document.querySelector("#resort-report tbody");
+  body.replaceChildren();
+  resortCatalog.forEach((resort) => {
+    const report = snowReports.resorts?.[resort.name];
+    const row = makeElement("tr");
+    const name = makeElement("th", "", resort.name);
+    name.scope = "row";
+    row.append(name);
+    for (const field of ["snow24", "snow48", "snow7", "depth"]) row.append(makeElement("td", "", snowTools.value(report, field)));
+    const source = makeElement("td");
+    source.append(makeExternalLink(report?.source || resort.source, report?.sourceName || "Resort website"), makeElement("small", "report-table-time", reportTimestamp(report)));
+    row.classList.toggle("snow-report-old", snowTools.stale(report));
+    row.append(source);
+    body.append(row);
+  });
+  const dated = Object.values(snowReports.resorts || {}).filter((r) => ["snow24", "snow48", "snow7", "depth"].some((f) => snowTools.value(r, f) !== "—")).length;
+  document.querySelector("#report-summary").textContent = `${resortCatalog.length} RESORTS · ${dated} WITH MEASUREMENTS`;
+  document.querySelector("#snow-coverage").textContent = `${dated}/${resortCatalog.length} REPORTS`;
+}
+
+async function refreshSnowReports() {
+  try {
+    const response = await fetch(new URL("./snow-reports.json", document.baseURI), { cache: "no-store" });
+    if (response.ok) {
+      const next = await response.json();
+      if (snowTools.valid(next)) snowReports = next;
+    }
+  } catch { /* Keep the last published reports through transient failures. */ }
+  renderSnowReports();
 }
 
 function populateResortFilter() {
@@ -368,8 +440,10 @@ async function refreshWall({ visibleOnly = false } = {}) {
   updateRegionVisibility();
   updateBatchStatus();
   updateFeedCount();
+  await refreshSnowReports();
 }
 
+renderSnowReports();
 populateResortFilter();
 updateRegionVisibility();
 cameraCards.forEach((card) => {
