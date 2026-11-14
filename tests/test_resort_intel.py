@@ -68,6 +68,50 @@ class ConditionsTest(unittest.TestCase):
 
 
 class SatelliteTest(unittest.TestCase):
+    def test_recent_shared_cache_copies_exact_bytes_without_rendering(self):
+        from PIL import Image
+        from io import BytesIO
+        data = BytesIO(); Image.new('RGB', (16, 16), 'green').save(data, format='WEBP')
+        encoded = data.getvalue()
+        now = datetime.now(timezone.utc).isoformat()
+        names = ['Arapahoe Basin', 'Loveland']
+        row = {'image': 'satellite/region-abc.webp', 'thumbnail': 'satellite/thumb-abc.webp', 'capturedAt': now, 'checkedAt': now}
+        manifest = {'schemaVersion': 2, 'resorts': {name: dict(row) for name in names}}
+        def get(url):
+            return json.dumps(manifest).encode() if url.endswith('satellite.json') else encoded
+        with tempfile.TemporaryDirectory() as temp, patch.object(satellite, 'get', side_effect=get) as fetch, patch.object(satellite, 'collect') as collect:
+            satellite.build(Path(temp), names)
+            collect.assert_not_called()
+            self.assertEqual(fetch.call_count, 3)  # manifest, one full image, one preview
+            self.assertEqual((Path(temp)/row['image']).read_bytes(), encoded)
+
+    def test_overlapping_same_capture_shares_bytes_and_keeps_geographic_windows(self):
+        import numpy as np
+        from PIL import Image
+        def rows(folder, other_date='2026-11-11T18:00:00Z'):
+            base = np.random.default_rng(7).integers(0, 255, (640, 896, 3), dtype='uint8')
+            Image.fromarray(base[:, :640]).save(folder/'satellite/a.jpg', quality=95)
+            Image.fromarray(base[:, 256:]).save(folder/'satellite/b.jpg', quality=95)
+            return {'A': {'image': 'satellite/a.jpg', 'bbox': [-106, 39, -105.9, 39.1], 'sceneId': 'tile-a',
+                          'provider': 'host', 'sensor': 'Sentinel-2', 'capturedAt': '2026-11-11T18:00:00Z'},
+                    'B': {'image': 'satellite/b.jpg', 'bbox': [-105.96, 39, -105.86, 39.1], 'sceneId': 'tile-b',
+                          'provider': 'host', 'sensor': 'Sentinel-2', 'capturedAt': other_date}}
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp); (folder/'satellite').mkdir()
+            resorts = rows(folder)
+            stats = satellite.publish_images(resorts, folder)
+            self.assertEqual(stats['fullImageCount'], 1)
+            self.assertLess(stats['fullImageBytes'], stats['unsharedWebpBytes'])
+            self.assertEqual(resorts['A']['image'], resorts['B']['image'])
+            self.assertAlmostEqual(resorts['A']['view'][0], 0)
+            self.assertAlmostEqual(resorts['B']['view'][0], 2/7)
+            self.assertAlmostEqual(resorts['A']['view'][2], 5/7)
+            self.assertNotEqual(resorts['A']['thumbnail'], resorts['B']['thumbnail'])
+            self.assertEqual(resorts['B']['sceneId'], 'tile-b')
+            resorts = rows(folder, '2026-11-12T18:00:00Z')
+            stats = satellite.publish_images(resorts, folder)
+            self.assertEqual(stats['fullImageCount'], 2)
+
     def test_primary_failure_uses_backup_and_preserves_acquisition(self):
         now = datetime.now(timezone.utc)
         scene = {'id': 'scene', 'properties': {'datetime': (now-timedelta(days=2)).isoformat()}}

@@ -74,6 +74,24 @@ GitHub scheduled runs continued to arrive 5–6 hours apart despite the 30-minut
 An active app heartbeat named **Powderline feed freshness watchdog** checks every 30 minutes in the original project chat. It verifies recovery after dispatch and reports failures. This backup requires the local computer and app to stay running; the GitHub schedule remains enabled when the local backup is unavailable. A server-hosted independent scheduler is still needed for an always-on freshness guarantee.
 # Satellite imagery and resort conditions
 
+The satellite section defaults to an all-resort regional gallery. Its 256 px
+WebP previews load lazily; a full image is requested only on resort selection.
+Nearby resorts from the same provider, sensor and acquisition time may share
+one geographic regional WebP, with normalized windows for each resort. Windows
+can span adjacent source tiles from that same acquisition. Acquisitions with
+different dates never merge. Sharing is used only if the encoded regional image
+is at least 5% smaller than separate WebPs. Large or sparse regions stay
+separate. Per-resort detail remains approximately 640 px across; digital zoom
+does not add sensor detail. Original scene metadata and local cloud estimates
+remain attached to each resort view.
+
+Full images and previews use content hashes in their filenames so unchanged
+imagery keeps a stable URL across deployments. A complete, recent collection
+copies each unique cached asset once without re-encoding. Browser caches can
+reuse a shared full image as the user switches between nearby resorts. The
+manifest includes storage measurements for previews, full images and the
+separate-WebP comparison. Browser/server cache lifetimes still depend on Pages.
+
 The existing Pages collection workflow also publishes `satellite.json`, small
 same-origin JPEG crops in `satellite/`, and `conditions.json`. No additional
 schedule is needed. A dedicated resort selector and links beneath each camera

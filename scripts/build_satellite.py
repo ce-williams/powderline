@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from io import BytesIO
 import json
+import hashlib
 import math
 import threading
 import time
@@ -26,6 +27,111 @@ HOSTS = [(ES, 'sentinel-2-l2a', 'Element 84 Earth Search', 10),
 TOKEN_LOCK = threading.Lock()
 TOKENS = {}
 STARTED = time.monotonic()
+ASSET_LOCK = threading.Lock()
+ASSET_CACHE = {}
+
+
+def asset_bytes(path):
+    # Shared assets are fetched once even when several resort jobs retain them.
+    with ASSET_LOCK:
+        if path not in ASSET_CACHE:
+            ASSET_CACHE[path] = get(PUBLIC+path)
+        return ASSET_CACHE[path]
+
+
+def union_bbox(rows):
+    return [min(r['bbox'][0] for r in rows), min(r['bbox'][1] for r in rows),
+            max(r['bbox'][2] for r in rows), max(r['bbox'][3] for r in rows)]
+
+
+def crop_view(bbox, atlas):
+    """Normalized top-left window; longitude rightward, latitude downward."""
+    return [(bbox[0]-atlas[0])/(atlas[2]-atlas[0]), (atlas[3]-bbox[3])/(atlas[3]-atlas[1]),
+            (bbox[2]-bbox[0])/(atlas[2]-atlas[0]), (bbox[3]-bbox[1])/(atlas[3]-atlas[1])]
+
+
+def encode_webp(image, size=None):
+    from PIL import Image
+    image = image.copy()
+    if size:
+        image.thumbnail((size, size), Image.Resampling.LANCZOS)
+    data = BytesIO()
+    image.save(data, format='WEBP', quality=82, method=4)
+    return data.getvalue()
+
+
+def publish_images(resorts, output):
+    """Deduplicate overlapping same-scene windows only when the bytes improve.
+
+    Compose georeferenced, already validated crops from the SAME acquisition.
+    Gaps outside resort windows stay black and are never shown in resort views.
+    Preserve each local crop's ~640px detail instead of stretching a tiny region.
+    """
+    from PIL import Image
+    available = [(n, r) for n, r in resorts.items() if r.get('image') and r.get('bbox')]
+    baseline = sum((output/r['image']).stat().st_size for _, r in available)
+    images, singles = {}, {}
+    def write(data, prefix):
+        path = 'satellite/'+prefix+'-'+hashlib.sha256(data).hexdigest()[:20]+'.webp'
+        (output/path).write_bytes(data)
+        return path
+    for name, row in available:
+        with Image.open(output/row['image']) as image:
+            images[name] = image.convert('RGB').resize((640, 640), Image.Resampling.LANCZOS)
+        singles[name] = encode_webp(images[name])
+        row['thumbnail'] = write(encode_webp(images[name], 256), 'thumb')
+    groups = []
+    for name, row in sorted(available):
+        chosen = None
+        for group in groups:
+            if any(date(resorts[n]['capturedAt']) != date(row['capturedAt']) or
+                   resorts[n]['sensor'] != row['sensor'] or resorts[n]['provider'] != row['provider'] for n in group):
+                continue
+            members = [resorts[n] for n in group]+[row]
+            box = union_bbox(members)
+            # Keep regional downloads bounded and require overlapping coverage.
+            area = (box[2]-box[0])*(box[3]-box[1])
+            total = sum((r['bbox'][2]-r['bbox'][0])*(r['bbox'][3]-r['bbox'][1]) for r in members)
+            if area < 1.05*total and box[2]-box[0] < .24 and box[3]-box[1] < .19:
+                chosen = group
+                break
+        if chosen is None:
+            groups.append([name])
+        else:
+            chosen.append(name)
+    shared = 0
+    for group in groups:
+        rows = [resorts[n] for n in group]
+        box = union_bbox(rows)
+        views = {n: crop_view(resorts[n]['bbox'], box) for n in group}
+        if len(group) > 1:
+            width = math.ceil(max(640/v[2] for v in views.values()))
+            height = math.ceil(max(640/v[3] for v in views.values()))
+            atlas = Image.new('RGB', (width, height))
+            for name in group:
+                x, y, w, h = views[name]
+                rect = [round(x*width), round(y*height), round((x+w)*width), round((y+h)*height)]
+                atlas.paste(images[name].resize((rect[2]-rect[0], rect[3]-rect[1]), Image.Resampling.LANCZOS), rect[:2])
+            encoded = encode_webp(atlas)
+            if len(encoded) < .95*sum(len(singles[n]) for n in group):
+                path = write(encoded, 'region')
+                for name in group:
+                    resorts[name].update(image=path, view=[round(v, 8) for v in views[name]], sharedWith=group, imageBytes=len(encoded))
+                shared += 1
+                continue
+        for name in group:
+            resorts[name].update(image=write(singles[name], 'scene'), view=[0, 0, 1, 1], sharedWith=[name], imageBytes=len(singles[name]))
+    # Remove intermediate JPEGs and old assets after all views have been encoded.
+    keep = {r[k] for _, r in available for k in ('image', 'thumbnail')}
+    for path in (output/'satellite').iterdir():
+        if 'satellite/'+path.name not in keep and path.is_file():
+            path.unlink()
+    full = {r['image'] for _, r in available}
+    thumbs = {r['thumbnail'] for _, r in available}
+    return {'resortCount': len(available), 'fullImageCount': len(full), 'sharedRegionCount': shared,
+            'inputCropJpegBytes': baseline, 'unsharedWebpBytes': sum(len(data) for data in singles.values()),
+            'fullImageBytes': sum((output/p).stat().st_size for p in full),
+            'thumbnailBytes': sum((output/p).stat().st_size for p in thumbs)}
 
 
 def get(url):
@@ -135,13 +241,20 @@ def save_previous(entry, output, now):
     if not timedelta(0) <= now-date(entry['capturedAt']) <= timedelta(days=30):
         return None
     path = entry.get('image', '')
-    if not path.startswith('satellite/') or '..' in path or not path.endswith('.jpg'):
+    if not path.startswith('satellite/') or '..' in path or not path.endswith(('.jpg', '.webp')):
         return None
-    data = get(PUBLIC+path)
+    data = asset_bytes(path)
     from PIL import Image
-    Image.open(BytesIO(data)).verify()
-    (output/path).write_bytes(data)
-    return dict(entry)
+    saved = dict(entry)
+    with Image.open(BytesIO(data)) as image:
+        view = entry.get('view', [0, 0, 1, 1])
+        x, y, w, h = view
+        crop = image.crop((round(x*image.width), round(y*image.height), round((x+w)*image.width), round((y+h)*image.height))).convert('RGB')
+        # Intermediate raw view; the final publication uses content-addressed WebP.
+        path = 'satellite/retained-'+hashlib.sha256(json.dumps(entry, sort_keys=True).encode()).hexdigest()[:20]+'.jpg'
+        crop.save(output/path, format='JPEG', quality=95)
+    saved.update(image=path, view=[0, 0, 1, 1])
+    return saved
 
 
 def collect(name, location, previous, output, now):
@@ -195,9 +308,30 @@ def build(output, only=None):
         locations = {n: p for n, p in locations.items() if n in only}
     (output/'satellite').mkdir(parents=True, exist_ok=True)
     try:
-        previous = json.loads(get(PUBLIC+'satellite.json')).get('resorts', {})
+        previous_manifest = json.loads(get(PUBLIC+'satellite.json'))
+        previous = previous_manifest.get('resorts', {})
     except Exception:
-        previous = {}
+        previous_manifest, previous = {}, {}
+    # Most half-hour builds only copy a small set of unchanged regional assets.
+    # Preserve their exact compressed bytes; never recompress cached images.
+    if previous_manifest.get('schemaVersion') == 2 and set(previous) == set(locations) and all(
+            r.get('image') and date(r.get('capturedAt')) and timedelta(0) <= now-date(r['capturedAt']) <= timedelta(days=30) and
+            date(r.get('checkedAt')) and timedelta(0) <= now-date(r['checkedAt']) < timedelta(hours=6) for r in previous.values()):
+        try:
+            paths = {r[k] for r in previous.values() for k in ('image', 'thumbnail')}
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                for path, data in pool.map(lambda p: (p, get(PUBLIC+p)), sorted(paths)):
+                    if not path.startswith('satellite/') or '..' in path or not path.endswith('.webp'):
+                        raise ValueError('Invalid cached image path')
+                    from PIL import Image
+                    Image.open(BytesIO(data)).verify()
+                    (output/path).write_bytes(data)
+            previous_manifest['generatedAt'] = now.isoformat()
+            (output/'satellite.json').write_text(json.dumps(previous_manifest, separators=(',', ':'))+'\n')
+            print(f'Satellite: reused {len(previous)} resort views from {len(paths)} cached assets', flush=True)
+            return
+        except Exception:
+            pass
     resorts = {}
     with ThreadPoolExecutor(max_workers=4) as pool:
         jobs = {pool.submit(collect, n, p, previous.get(n, {}), output, now): n for n, p in locations.items()}
@@ -208,7 +342,8 @@ def build(output, only=None):
             except Exception as error:
                 resorts[name] = {'unavailable': True, 'checkedAt': now.isoformat()}
                 print(f'Satellite unavailable: {name}: {type(error).__name__}', flush=True)
-    payload = {'generatedAt': now.isoformat(), 'resorts': resorts}
+    stats = publish_images(resorts, output)
+    payload = {'schemaVersion': 2, 'generatedAt': now.isoformat(), 'resorts': resorts, 'storage': stats}
     (output/'satellite.json').write_text(json.dumps(payload, separators=(',', ':'))+'\n')
     print(f'Satellite: {sum(bool(x.get("image")) for x in resorts.values())}/{len(resorts)} resort crops', flush=True)
 

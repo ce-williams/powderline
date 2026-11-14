@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../resort-intel.js';
 const tools = globalThis.powderlineIntelTools;
+test('shared geographic windows stay within their source image', () => {
+  assert.equal(tools.validView([0.2, 0.1, 0.6, 0.8]), true);
+  for (const view of [[-0.1, 0, 1, 1], [0.6, 0, 0.6, 1], [0, 0, 0, 1], [NaN, 0, 1, 1], [0, 0, 1]]) assert.equal(tools.validView(view), false);
+  assert.equal(tools.imagePath('satellite/region-abcdef1234.webp'), true);
+});
 test('satellite paths and dates reject traversal, remote substitutions and old captures', () => {
   const now = Date.now();
   const row = {image: 'satellite/copper-mountain.jpg', source: 'https://example.com', capturedAt: new Date(now).toISOString()};

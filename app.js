@@ -362,6 +362,7 @@ function prepareImage(card) {
 
 function applyResortFilter() {
   activeResort = resortFilter.value;
+  window.powderlineIntel?.select(activeResort, false);
   cameraCards.forEach((card) => {
     card.hidden = activeResort !== "all" && card.dataset.resort !== activeResort;
     card.setAttribute("aria-hidden", String(card.hidden));
