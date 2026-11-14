@@ -28,14 +28,18 @@ PREFERRED = {
     'Breckenridge': ['Colorado SuperChair', 'Rocky Mountain SuperChair', 'Independence SuperChair'],
     'Vail': ['Gondola One', 'Eagle Bahn Gondola', 'Mountaintop Express'],
     'Beaver Creek': ['Centennial Express', 'Strawberry Park Express', 'Birds of Prey Express'],
+    'Loveland': ["Chet's Dream", 'Lift 2', 'Ptarmigan Lift'],
+    'Eldora': ['Alpenglow', 'Indian Peaks', 'Corona'],
     'Winter Park': ['The Gondola', 'Super Gauge Express', 'Pioneer Express'],
     'Steamboat': ['Wild Blue Gondola', 'Steamboat Gondola', 'Sundown Express'],
-    'Aspen Mountain': ['Silver Queen Gondola', 'Ajax Express', 'Gentleman’s Ridge'],
+    'Aspen Mountain': ['Silver Queen', 'Ajax Express', 'Gentleman’s Ridge'],
     'Aspen Highlands': ['Exhibition', 'Loge Peak', 'Cloud Nine'],
     'Buttermilk': ['Summit Express', 'West Buttermilk Express', 'Tiehack Express'],
     'Snowmass': ['Elk Camp Gondola', 'Village Express', 'Alpine Springs'],
     'Crested Butte': ['Red Lady Express', 'Silver Queen Express', 'Paradise Express'],
     'Telluride': ['Gondola', 'Village Express', 'Plunge'],
+    'Powderhorn': ['Flat Top Flyer', 'West End', 'Easy Rider'],
+    'Wolf Creek': ['Treasure Stoke Chairlift', 'Bonanza Chair', 'Alberta Lift'],
 }
 
 

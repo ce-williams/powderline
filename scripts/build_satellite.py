@@ -67,6 +67,7 @@ def publish_images(resorts, output):
                    view=[0, 0, 1, 1], sharedWith=[name], imageBytes=len(full),
                    pixelWidth=image.width, pixelHeight=image.height)
         row['spanKm'] = round((row['bbox'][3]-row['bbox'][1])*111.32, 2)
+        row['orientation'] = 'north-up'
     keep = {r[k] for _, r in available for k in ('image', 'thumbnail')}
     for path in (output/'satellite').iterdir():
         if 'satellite/'+path.name not in keep and path.is_file():
@@ -293,6 +294,8 @@ def build(output, only=None):
                     Image.open(BytesIO(data)).verify()
                     (output/path).write_bytes(data)
             previous_manifest['generatedAt'] = now.isoformat()
+            for row in previous.values():
+                row['orientation'] = 'north-up'
             (output/'satellite.json').write_text(json.dumps(previous_manifest, separators=(',', ':'))+'\n')
             print(f'Satellite: reused {len(previous)} resort views from {len(paths)} cached assets', flush=True)
             return

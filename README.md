@@ -93,8 +93,10 @@ All images expire after 30 days. Cloud/invalid-data checks still apply.
 `lift-routes.json` contains a small, attributed derivative of OpenSkiData / OSM,
 served publicly under ODbL. The map-data timestamp is independent of image
 capture time. The UI projects those longitude/latitude polylines onto the crop
-and keeps them aligned during zoom and expansion. A toggle hides the red lines;
-the numbered legend names the lifts and links to original OSM features. Resort
+and keeps them aligned during zoom and expansion. A consistent north-up / east-right compass appears on square gallery previews,
+resort views and expanded images. A single primary lift/gondola is drawn in red
+and labeled by name directly on the map. Its label stays tied to the visible
+route during zoom. A toggle hides the line, and the source link remains below. Resort
 membership comes from upstream ski-area associations, not nearest-neighbor
 assignment. Preferred named trunk lifts are selected where known, then longest
 major aerialways fill the remaining slots. This is a subset of lift

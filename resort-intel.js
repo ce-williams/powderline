@@ -51,19 +51,42 @@
     img.style.left = `${50-(x+w/2)*100*zoom/w}%`; img.style.top = `${50-(y+h/2)*100*zoom/h}%`;
     frame.append(img);
   }
+  function orientationMark(frame) {
+    frame.querySelector('.satellite-north')?.remove();
+    const mark = el('div', 'satellite-north');
+    mark.setAttribute('aria-label', 'North is up; east is right');
+    mark.append(el('strong', '', 'N ↑'), el('span', '', 'NORTH UP · E →')); frame.append(mark);
+  }
+  const liftName = (route) => route.name === 'Mapped lift' ? `${route.type === 'chair_lift' ? 'Chairlift' : 'Lift'} (name unavailable)` : route.name;
   function liftOverlay(frame, scene, routes, zoom = 1) {
     frame.querySelector('.lift-overlay')?.remove();
     if (!Array.isArray(scene.bbox) || scene.bbox.length !== 4 || !routes.length) return;
     const ns = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(ns, 'svg'); svg.classList.add('lift-overlay');
     svg.setAttribute('viewBox', '0 0 1000 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-    routes.forEach((route, i) => {
+    routes.slice(0, 1).forEach((route) => {
       if (!Array.isArray(route.coordinates) || route.coordinates.length < 2) return;
       const points = route.coordinates.map((c) => project(c, scene.bbox)).map(([x, y]) => [500+(x-500)*zoom, 500+(y-500)*zoom]);
       const line = document.createElementNS(ns, 'polyline');
       line.setAttribute('points', points.map((p) => p.join(',')).join(' ')); line.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(line);
-      const [x, y] = points[Math.floor(points.length/2)];
-      const marker = document.createElementNS(ns, 'text'); marker.setAttribute('x', x+10); marker.setAttribute('y', y-10); marker.textContent = String(i+1); svg.append(marker);
+      // Anchor the name to the visible part of the line nearest the map center.
+      const anchors = points.slice(1).map((b, i) => {
+        const a = points[i], dx = b[0]-a[0], dy = b[1]-a[1];
+        const t = Math.max(0, Math.min(1, ((500-a[0])*dx+(500-a[1])*dy)/(dx*dx+dy*dy || 1)));
+        return [a[0]+t*dx, a[1]+t*dy];
+      }).filter(([x, y]) => x >= 0 && x <= 1000 && y >= 0 && y <= 1000)
+        .sort((a, b) => Math.hypot(a[0]-500, a[1]-500)-Math.hypot(b[0]-500, b[1]-500));
+      if (!anchors.length) return;
+      const [x, y] = anchors[0];
+      const name = liftName(route);
+      const width = Math.min(900, name.length*17+32), height = 62;
+      const left = Math.max(24, Math.min(976-width, x+28)), top = Math.max(120, Math.min(870, y-90));
+      const leader = document.createElementNS(ns, 'line'); leader.setAttribute('class', 'lift-label-leader');
+      leader.setAttribute('x1', x); leader.setAttribute('y1', y); leader.setAttribute('x2', left+16); leader.setAttribute('y2', top+height/2); leader.setAttribute('vector-effect', 'non-scaling-stroke');
+      const background = document.createElementNS(ns, 'rect'); background.setAttribute('x', left); background.setAttribute('y', top); background.setAttribute('width', width); background.setAttribute('height', height); background.setAttribute('rx', 8);
+      const marker = document.createElementNS(ns, 'text'); marker.setAttribute('x', left+16); marker.setAttribute('y', top+42); marker.textContent = name;
+      const title = document.createElementNS(ns, 'title'); title.textContent = `Main reference lift: ${name}`;
+      svg.append(title, leader, background, marker);
     });
     frame.append(svg);
   }
@@ -88,6 +111,8 @@
           else { img.src = imageUrl(scene); showCrop(preview, img, scene); }
           img.addEventListener("error", () => preview.replaceChildren(el("span", "", "Preview unavailable · open resort")));
           preview.append(img);
+          orientationMark(preview);
+          liftOverlay(preview, scene, lifts.resorts?.[resort.name]?.routes || []);
         } else preview.append(el("span", "", "Awaiting a usable scene"));
         const caption = el("div", "satellite-thumb-caption");
         caption.append(el("strong", "", resort.name), el("span", "", usableImage(scene) ? `${scene.sensor} · ${stamp(scene.capturedAt)}` : "No recent usable image"), el("span", "gallery-open", "Zoom in & read conditions ↗"));
@@ -103,7 +128,7 @@
     }
     const name = select.value, resort = catalog.find((r) => r.name === name);
     const scene = satellite.resorts?.[name], read = conditions.resorts?.[name];
-    const routes = lifts.resorts?.[name]?.routes || [];
+    const routes = (lifts.resorts?.[name]?.routes || []).slice(0, 1);
     const layout = el("div", "intel-layout");
     const figure = el("figure", "satellite-panel");
     const frame = el("div", "satellite-frame");
@@ -116,7 +141,8 @@
       });
       showCrop(frame, img, scene);
       const span = Number.isFinite(scene.spanKm) ? scene.spanKm : Array.isArray(scene.bbox) ? (scene.bbox[3]-scene.bbox[1])*111.32 : 10;
-      frame.append(el("span", "satellite-north", "N ↑"), el("span", "satellite-scale", `${span.toFixed(1)} KM ACROSS · TRUE COLOR`));
+      orientationMark(frame);
+      frame.append(el("span", "satellite-scale", `${span.toFixed(1)} KM ACROSS · TRUE COLOR`));
       let zoom = 1;
       let linesVisible = true;
       liftOverlay(frame, scene, routes, zoom);
@@ -138,14 +164,15 @@
         dialog.querySelector("h2").textContent = `${name} · ${scene.sensor}`;
         const expanded = dialog.querySelector("img"); expanded.src = img.src; expanded.alt = img.alt;
         showCrop(dialog.querySelector('.satellite-dialog-frame'), expanded, scene, zoom);
+        orientationMark(dialog.querySelector('.satellite-dialog-frame'));
         liftOverlay(dialog.querySelector('.satellite-dialog-frame'), scene, linesVisible ? routes : [], zoom);
         dialog.querySelector("p").textContent = `Captured ${stamp(scene.capturedAt)} · ${scene.attribution}. North up; ${(span/zoom).toFixed(1)} km across. Lift routes are map references, not current operating status.`;
         dialog.showModal();
       });
       frame.append(expand);
       if (routes.length) {
-        const toggle = el('button', 'lift-toggle', 'Lift routes on'); toggle.type = 'button'; toggle.setAttribute('aria-pressed', 'true');
-        toggle.addEventListener('click', () => { linesVisible = !linesVisible; toggle.textContent = `Lift routes ${linesVisible ? 'on' : 'off'}`; toggle.setAttribute('aria-pressed', String(linesVisible)); liftOverlay(frame, scene, linesVisible ? routes : [], zoom); });
+        const toggle = el('button', 'lift-toggle', 'Main lift on'); toggle.type = 'button'; toggle.setAttribute('aria-pressed', 'true');
+        toggle.addEventListener('click', () => { linesVisible = !linesVisible; toggle.textContent = `Main lift ${linesVisible ? 'on' : 'off'}`; toggle.setAttribute('aria-pressed', String(linesVisible)); liftOverlay(frame, scene, linesVisible ? routes : [], zoom); });
         frame.append(toggle);
       }
     } else frame.append(el("p", "satellite-empty", "No usable satellite crop from the past 30 days. Clouds or source availability can delay imagery."));
@@ -161,8 +188,8 @@
       if (scene.resolutionM >= 30) caption.append(el('span', 'intel-old', 'Coarser 30 m backup imagery · lower terrain detail than Sentinel-2.'));
     }
     const routeList = el('div', 'lift-legend');
-    routeList.append(el('strong', '', 'SELECTED LIFT ROUTES'));
-    routes.forEach((r, i) => { if (https(r.source)) routeList.append(link(r.source, `${i+1}. ${r.name} ↗`)); });
+    routeList.append(el('strong', '', 'MAIN REFERENCE LIFT / GONDOLA'));
+    routes.forEach((r) => { if (https(r.source)) routeList.append(link(r.source, `${liftName(r)} ↗`)); });
     routeList.append(el('small', '', routes.length ? 'Approximate mapped routes; no open/closed status is implied.' : 'No verified mapped lift route is available for this resort.'));
     if (Number.isFinite(Date.parse(lifts.sourceDataAt))) routeList.append(el('small', '', `Map data as of ${stamp(lifts.sourceDataAt)}`));
     caption.append(routeList);
