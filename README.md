@@ -72,3 +72,69 @@ A direct browser source check also found Telluride Revelation Bowl explicitly of
 GitHub scheduled runs continued to arrive 5–6 hours apart despite the 30-minute request. `python3 -B scripts/check_feed_freshness.py` reports the published batch's age and the current Pages workflow state. Add `--refresh` to dispatch the existing workflow when the batch is older than 40 minutes and no build is active. It uses existing `gh` authentication, never stores credentials, and reports builds older than 20 minutes as stalled instead of piling up duplicate jobs.
 
 An active app heartbeat named **Powderline feed freshness watchdog** checks every 30 minutes in the original project chat. It verifies recovery after dispatch and reports failures. This backup requires the local computer and app to stay running; the GitHub schedule remains enabled when the local backup is unavailable. A server-hosted independent scheduler is still needed for an always-on freshness guarantee.
+# Satellite imagery and resort conditions
+
+The existing Pages collection workflow also publishes `satellite.json`, small
+same-origin JPEG crops in `satellite/`, and `conditions.json`. No additional
+schedule is needed. A dedicated resort selector and links beneath each camera
+open the satellite and conditions briefing.
+
+Imagery uses public Sentinel-2 Level-2A cloud-optimized GeoTIFFs through Element
+84 Earth Search, with Microsoft Planetary Computer as an alternate host and
+Landsat Collection 2 Level-2 as an independent sensor fallback. These are direct
+open-data sources, not CalTopo's licensed tile service. Each 10 km crop is north
+up around an approximate resort reference point in `resort-locations.json`, not
+a resort boundary. Capture time is preserved. Search is limited to 30 days;
+newest qualifying scenes take precedence. Crops require 95% valid coverage and
+at most 35% estimated cloud/cloud-shadow using Sentinel SCL or Landsat QA bits.
+Snow classification is not used to infer texture. Provider cloud masks can be
+imperfect over snow. Checked images are reused for six hours; failed requests
+can retain a dated crop for at most 30 days, labeled as saved. NASA Worldview is
+also linked for coarser daily regional context. No imagery API key is needed.
+
+Conditions combine dated Colorado Ski Country USA / official resort reports
+with the National Weather Service hourly point forecast. Primary and secondary
+surface fields are retained, along with resort notes for terrain/elevation
+nuance. Same-day means America/Denver; older reports remain dated and expire
+after 72 hours. Forecasts expire after 18 hours. Forecast temperatures crossing
+freezing are labeled as a possibility, never a confirmed surface texture.
+Missing, future-dated and expired evidence is excluded. A new collection time
+does not refresh the source's report or image acquisition time.
+
+For automatically generated AI prose, add **`OPENAI_API_KEY`** as a GitHub
+Actions repository secret. Optionally set repository variable
+**`POWDERLINE_AI_MODEL`** (default `gpt-4.1-mini`, Responses API with strict JSON
+output). The key is available only to the build step, never to browser assets.
+The generator sends only the public evidence bundle, disables response storage,
+requires known source IDs, rejects unsupported surface terminology, and reuses
+unchanged AI output for up to six hours. AI can still make mistakes: the UI
+shows its dated inputs and the original resort notes. Missing keys, rejected
+output, refusal, rate limits and provider failures use an explicitly labeled
+source-based fallback; that fallback is not described as AI-generated. No
+production AI calls have been verified without a configured secret.
+
+OpenSnow and Slopes are external reading links only. OpenSnow's terms prohibit
+scraping and derivative use without permission; licensed provider integration
+can be added separately. No private endpoints, paywall bypass, social posts or
+anonymous reports are used as current conditions evidence.
+
+References:
+
+- [CalTopo live satellite layers](https://training.caltopo.com/all_users/base-layers/layers)
+- [Earth Search source and collections](https://github.com/Element84/earth-search)
+- [Planetary Computer signing](https://planetarycomputer.microsoft.com/docs/concepts/sas/)
+- [USGS Landsat scaling](https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products)
+- [NWS API](https://www.weather.gov/documentation/services-web-api)
+- [OpenAI structured output](https://developers.openai.com/api/docs/guides/structured-outputs)
+- [OpenSnow terms](https://support.opensnow.com/legal/terms)
+
+Local collection:
+
+```sh
+python3 -B scripts/build_snow_reports.py --output _site
+python3 -B scripts/build_satellite.py --output _site
+python3 -B scripts/build_conditions.py --output _site
+```
+
+Satellite and conditions collectors accept repeated `--resort 'Copper Mountain'`
+arguments for focused previews. Install `requirements-snapshots.txt` first.

@@ -441,6 +441,7 @@ async function refreshWall({ visibleOnly = false } = {}) {
   updateBatchStatus();
   updateFeedCount();
   await refreshSnowReports();
+  await window.powderlineIntel?.refresh();
 }
 
 renderSnowReports();

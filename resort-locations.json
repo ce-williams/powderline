@@ -1,0 +1,22 @@
+{
+  "note": "Approximate ski-area reference points, not trail boundaries or open terrain. Crops cover a 10 km square around each point.",
+  "resorts": {
+    "Arapahoe Basin": [39.635, -105.871], "Keystone": [39.594, -105.949],
+    "Breckenridge": [39.474, -106.067], "Copper Mountain": [39.493, -106.151],
+    "Vail": [39.606, -106.355], "Beaver Creek": [39.604, -106.516],
+    "Loveland": [39.680, -105.897], "Echo Mountain": [39.684, -105.519],
+    "Eldora": [39.937, -105.589], "Hoedown Hill": [40.441, -104.948],
+    "Winter Park": [39.880, -105.762], "Granby Ranch": [40.044, -105.906],
+    "Steamboat": [40.458, -106.777], "Howelsen Hill": [40.481, -106.838],
+    "Aspen Mountain": [39.176, -106.829], "Aspen Highlands": [39.176, -106.856],
+    "Buttermilk": [39.206, -106.861], "Snowmass": [39.193, -106.957],
+    "Sunlight Mountain": [39.399, -107.339], "Ski Cooper": [39.360, -106.302],
+    "Monarch Mountain": [38.512, -106.332], "Crested Butte": [38.899, -106.944],
+    "Cranor Hill": [38.576, -106.923], "Powderhorn": [39.064, -108.151],
+    "Telluride": [37.931, -107.846], "Silverton Mountain": [37.885, -107.665],
+    "Kendall Mountain": [37.811, -107.655], "Lee's Ski Hill": [38.022, -107.669],
+    "Lake City Ski Hill": [38.020, -107.322], "Purgatory": [37.630, -107.817],
+    "Hesperus": [37.299, -108.055], "Chapman Hill": [37.283, -107.868],
+    "Wolf Creek": [37.473, -106.794], "Cuchara Mountain Park": [37.348, -105.123]
+  }
+}

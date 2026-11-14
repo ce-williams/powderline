@@ -7,7 +7,7 @@
     <meta name="description" content="A live field view of Colorado mountain cameras, snow reports, and I-70 travel conditions." />
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://*.brownrice.com https://cache.snow.com https://dirigo-resorts-f4e2bde5azc2cne6.z02.azurefd.net https://watch.hdrelay.io https://img.hdrelay.com https://manage.hdrelay.com https://cams.skiloveland.com https://*.ipcamlive.com https://backend.roundshot.com https://*.roundshot.com https://webcam.io https://*.webcam.io; frame-src https://player.brownrice.com https://*.ipcamlive.com https://skicooper.com:8443; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <title>POWDERLINE — Colorado mountain intelligence</title>
-    <link rel="stylesheet" href="./styles.css?v=snow-stats-8" />
+    <link rel="stylesheet" href="./styles.css?v=resort-intel-1" />
   </head>
   <body>
     <div class="app-shell">
@@ -18,6 +18,7 @@
         </a>
         <nav class="main-nav" aria-label="Main navigation">
           <a class="active" href="#mountain-wall">Cameras</a>
+          <a href="#resort-intel">Satellite & snow</a>
           <a href="#resort-report">Reports</a>
           <a href="#road-intel">Roads</a>
           <a href="#plans">Plans</a>
@@ -50,6 +51,20 @@
               <div class="brief-stamps"><span><b class="stamp-icon">◉</b> LIVE CAMS VERIFY AT SOURCE</span><span><b class="stamp-icon muted">≋</b> RESORT SNOW REPORTS</span></div>
             </div>
           </div>
+        </section>
+
+        <section class="intel-section" id="resort-intel" aria-labelledby="intel-title">
+          <div class="section-heading">
+            <div class="heading-left"><span class="section-index">↗</span><div><div class="eyebrow">FROM ORBIT TO THE SNOW SURFACE</div><h2 id="intel-title">Satellite & snow read</h2></div></div>
+            <label class="intel-picker">YOUR MOUNTAIN <select id="intel-resort" aria-label="Resort satellite imagery and conditions"></select></label>
+          </div>
+          <div id="intel-view" aria-live="polite"><p>Loading dated satellite imagery and conditions…</p></div>
+          <details class="intel-method"><summary>Sources, snow vocabulary & how to read this</summary>
+            <p>Satellite images show coverage, not ski texture or open runs. Crops are approximately 10 km across, north up; the crosshair marks an approximate ski-area reference point. Sentinel-2 provides 10 m imagery with a roughly five-day revisit; clouds and processing can delay usable views. Landsat provides a 30 m backup. We show capture time separately from collection time and reject heavily obscured crops. Visibility estimates include cloud and cloud shadow and can be imperfect over snow.</p>
+            <p>Surface tags come from dated resort surface fields. Reports from today in Mountain Time take priority; older official reports are labeled and expire after 72 hours. NWS weather is forecast context, not confirmation of snow texture. AI summaries cite their inputs; a source-based fallback appears when AI is unavailable. Camera images are not automatically interpreted as surface reports.</p>
+            <p>Powder = loose new snow; packed powder = compacted dry snow; dust on crust = a thin fresh layer over a firm crust; granular = loose or refrozen grains; corn = softened spring grains; slush = wet snow; crud = chopped or tracked snow; wind-affected = drifted, packed or scoured snow. Mixed surfaces can coexist across elevation, aspect and traffic. Unconfirmed categories stay unconfirmed.</p>
+            <p><a href="https://training.caltopo.com/all_users/base-layers/layers" target="_blank" rel="noopener noreferrer">CalTopo imagery guide ↗</a> · <a href="https://planetarycomputer.microsoft.com/catalog" target="_blank" rel="noopener noreferrer">Planetary Computer ↗</a> · <a href="https://earth-search.aws.element84.com/v1" target="_blank" rel="noopener noreferrer">Earth Search backup host ↗</a> · <a href="https://opensnow.com/" target="_blank" rel="noopener noreferrer">OpenSnow ↗</a> · <a href="https://getslopes.com/" target="_blank" rel="noopener noreferrer">Slopes ↗</a>. OpenSnow and Slopes are external reading links; their reports are not ingested. Conditions summaries do not establish avalanche safety or terrain access.</p>
+          </details>
         </section>
 
         <section class="camera-section" id="mountain-wall" aria-labelledby="camera-title">
@@ -131,11 +146,12 @@
 
       <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>POWDER<span class="brand-light">LINE</span></span></a><span>COLORADO MOUNTAIN INTELLIGENCE</span><span>CAMERAS ARE VISUAL OBSERVATIONS · CHECK OFFICIAL SOURCES FOR CONDITIONS</span></footer>
     </div>
-    <script src="./camera-catalog.js?v=snow-stats-8"></script>
-    <script src="./snapshot-state.js?v=snow-stats-8"></script>
-    <script src="./snapshot-manifest.js?v=snow-stats-8"></script>
-    <script src="./snow-report-state.js?v=snow-stats-8"></script>
-    <script src="./snow-reports.js?v=snow-stats-8"></script>
-    <script src="./app.js?v=snow-stats-8"></script>
+    <script src="./camera-catalog.js?v=resort-intel-1"></script>
+    <script src="./snapshot-state.js?v=resort-intel-1"></script>
+    <script src="./snapshot-manifest.js?v=resort-intel-1"></script>
+    <script src="./snow-report-state.js?v=resort-intel-1"></script>
+    <script src="./snow-reports.js?v=resort-intel-1"></script>
+    <script src="./resort-intel.js?v=resort-intel-1"></script>
+    <script src="./app.js?v=resort-intel-1"></script>
   </body>
 </html>

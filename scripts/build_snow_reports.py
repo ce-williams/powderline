@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Collect public resort measurements alongside the scheduled camera batch."""
 import argparse
+import html as html_lib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 import json
@@ -66,6 +67,9 @@ def parse_colorado(payload, fetched_at):
             'depthLabel': 'MID-MTN',
             'liftsOpen': number(snow.get('open_lifts')),
             'liftsTotal': number(snow.get('available_lifts', resort.get('available_lifts'))),
+            'surfacePrimary': str(snow.get('surface_conditions') or '')[:200],
+            'surfaceSecondary': str(snow.get('secondary_surface_conditions') or '')[:200],
+            'conditionsText': html_lib.unescape(re.sub(r'<[^>]+>', ' ', str(snow.get('resort_conditions') or '')))[:4000],
         }
     return result
 
@@ -83,7 +87,8 @@ def parse_vail(html, source, fetched_at):
     offset = -6 if date_match[2] == 'MDT' else -7
     reported = datetime.strptime(date_match[1], '%B %d, %Y at %I:%M %p').replace(tzinfo=timezone(timedelta(hours=offset)))
     result = {'source': source, 'sourceName': 'Official resort report', 'fetchedAt': fetched_at,
-              'reportedAt': reported.isoformat(), 'depthLabel': 'BASE', 'liftsOpen': None, 'liftsTotal': None}
+              'reportedAt': reported.isoformat(), 'depthLabel': 'BASE', 'liftsOpen': None, 'liftsTotal': None,
+              'overallConditions': str(data.get('OverallSnowConditions') or '')[:200]}
     for key, source_key in [('snow24', 'TwentyFourHourSnowfall'), ('snow48', 'FortyEightHourSnowfall'),
                             ('snow7', 'SevenDaySnowfall'), ('depth', 'BaseDepth')]:
         result[key] = number((data.get(source_key) or {}).get('Inches'))
