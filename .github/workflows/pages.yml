@@ -46,7 +46,7 @@ jobs:
       - name: Assemble public site
         run: |
           mkdir _site
-          cp index.html styles.css app.js resort-intel.js camera-catalog.js source-registry.json snapshot-state.js snapshot-manifest.js snow-report-state.js snow-reports.js LICENSE _site/
+          cp index.html styles.css app.js resort-intel.js lift-routes.json camera-catalog.js source-registry.json snapshot-state.js snapshot-manifest.js snow-report-state.js snow-reports.js LICENSE _site/
       - name: Collect camera snapshots and retain last-good images
         run: python scripts/build_snapshots.py --output _site
       - name: Collect resort snow reports

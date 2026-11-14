@@ -16,9 +16,10 @@
     timestamp(row.generatedAt, 18 * 3600000, now) && Array.isArray(row.sources) &&
     row.sources.length > 0 && row.sources.every((s) => https(s.url) && timestamp(s.reportedAt, s.kind === "forecast" ? 18 * 3600000 : MAX_REPORT, now));
   const usableImage = (row, now = Date.now()) => row && imagePath(row.image) && validView(row.view) && https(row.source) && timestamp(row.capturedAt, MAX_IMAGE, now);
-  root.powderlineIntelTools = {timestamp, imagePath, validView, usableRead, usableImage};
+  const project = (coordinate, bbox) => [(coordinate[0]-bbox[0])/(bbox[2]-bbox[0])*1000, (bbox[3]-coordinate[1])/(bbox[3]-bbox[1])*1000];
+  root.powderlineIntelTools = {timestamp, imagePath, validView, usableRead, usableImage, project};
   if (typeof document === "undefined") return;
-  let satellite = {resorts: {}}, conditions = {resorts: {}};
+  let satellite = {resorts: {}}, conditions = {resorts: {}}, lifts = {resorts: {}};
   const catalog = root.powderlineResortCatalog || [];
   const select = document.querySelector("#intel-resort");
   const view = document.querySelector("#intel-view");
@@ -50,6 +51,22 @@
     img.style.left = `${50-(x+w/2)*100*zoom/w}%`; img.style.top = `${50-(y+h/2)*100*zoom/h}%`;
     frame.append(img);
   }
+  function liftOverlay(frame, scene, routes, zoom = 1) {
+    frame.querySelector('.lift-overlay')?.remove();
+    if (!Array.isArray(scene.bbox) || scene.bbox.length !== 4 || !routes.length) return;
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg'); svg.classList.add('lift-overlay');
+    svg.setAttribute('viewBox', '0 0 1000 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
+    routes.forEach((route, i) => {
+      if (!Array.isArray(route.coordinates) || route.coordinates.length < 2) return;
+      const points = route.coordinates.map((c) => project(c, scene.bbox)).map(([x, y]) => [500+(x-500)*zoom, 500+(y-500)*zoom]);
+      const line = document.createElementNS(ns, 'polyline');
+      line.setAttribute('points', points.map((p) => p.join(',')).join(' ')); line.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(line);
+      const [x, y] = points[Math.floor(points.length/2)];
+      const marker = document.createElementNS(ns, 'text'); marker.setAttribute('x', x+10); marker.setAttribute('y', y-10); marker.textContent = String(i+1); svg.append(marker);
+    });
+    frame.append(svg);
+  }
   function renderGallery() {
     gallery.replaceChildren();
     const ready = catalog.filter((r) => usableImage(satellite.resorts?.[r.name])).length;
@@ -66,7 +83,7 @@
         const preview = el("div", "satellite-thumb");
         if (usableImage(scene)) {
           const img = el("img"); img.alt = `${resort.name}, captured ${stamp(scene.capturedAt)}`;
-          img.loading = "lazy"; img.decoding = "async"; img.width = 256; img.height = 256;
+          img.loading = "lazy"; img.decoding = "async"; img.width = 448; img.height = 448;
           if (imagePath(scene.thumbnail)) img.src = new URL(scene.thumbnail, document.baseURI).href;
           else { img.src = imageUrl(scene); showCrop(preview, img, scene); }
           img.addEventListener("error", () => preview.replaceChildren(el("span", "", "Preview unavailable · open resort")));
@@ -86,6 +103,7 @@
     }
     const name = select.value, resort = catalog.find((r) => r.name === name);
     const scene = satellite.resorts?.[name], read = conditions.resorts?.[name];
+    const routes = lifts.resorts?.[name]?.routes || [];
     const layout = el("div", "intel-layout");
     const figure = el("figure", "satellite-panel");
     const frame = el("div", "satellite-frame");
@@ -97,8 +115,11 @@
         frame.replaceChildren(el("p", "satellite-empty", "Satellite image could not load. Open the scene source below."));
       });
       showCrop(frame, img, scene);
-      frame.append(el("span", "satellite-north", "N ↑"), el("span", "satellite-crosshair", "+"), el("span", "satellite-scale", "10 KM ACROSS · TRUE COLOR"));
+      const span = Number.isFinite(scene.spanKm) ? scene.spanKm : Array.isArray(scene.bbox) ? (scene.bbox[3]-scene.bbox[1])*111.32 : 10;
+      frame.append(el("span", "satellite-north", "N ↑"), el("span", "satellite-scale", `${span.toFixed(1)} KM ACROSS · TRUE COLOR`));
       let zoom = 1;
+      let linesVisible = true;
+      liftOverlay(frame, scene, routes, zoom);
       const zoomTools = el("div", "satellite-zoom-tools");
       const zoomOut = el("button", "", "−"), zoomIn = el("button", "", "+");
       zoomOut.type = zoomIn.type = "button"; zoomOut.setAttribute("aria-label", "Zoom satellite out"); zoomIn.setAttribute("aria-label", "Zoom satellite in");
@@ -106,7 +127,8 @@
       function changeZoom(next) {
         zoom = Math.max(1, Math.min(3, next)); showCrop(frame, img, scene, zoom);
         zoomLabel.textContent = `${zoom}×`; zoomOut.disabled = zoom === 1; zoomIn.disabled = zoom === 3;
-        frame.querySelector('.satellite-scale').textContent = `${(10/zoom).toFixed(1)} KM ACROSS · ${zoom > 1 ? 'DIGITAL ZOOM' : 'TRUE COLOR'}`;
+        frame.querySelector('.satellite-scale').textContent = `${(span/zoom).toFixed(1)} KM ACROSS · ${zoom > 1 ? 'DIGITAL ZOOM' : 'TRUE COLOR'}`;
+        liftOverlay(frame, scene, linesVisible ? routes : [], zoom);
       }
       zoomOut.addEventListener("click", () => changeZoom(zoom-1)); zoomIn.addEventListener("click", () => changeZoom(zoom+1)); zoomOut.disabled = true;
       zoomTools.append(zoomOut, zoomLabel, zoomIn); frame.append(zoomTools);
@@ -116,10 +138,16 @@
         dialog.querySelector("h2").textContent = `${name} · ${scene.sensor}`;
         const expanded = dialog.querySelector("img"); expanded.src = img.src; expanded.alt = img.alt;
         showCrop(dialog.querySelector('.satellite-dialog-frame'), expanded, scene, zoom);
-        dialog.querySelector("p").textContent = `Captured ${stamp(scene.capturedAt)} · ${scene.attribution}. North up; 10 km across. No trail boundaries shown.`;
+        liftOverlay(dialog.querySelector('.satellite-dialog-frame'), scene, linesVisible ? routes : [], zoom);
+        dialog.querySelector("p").textContent = `Captured ${stamp(scene.capturedAt)} · ${scene.attribution}. North up; ${(span/zoom).toFixed(1)} km across. Lift routes are map references, not current operating status.`;
         dialog.showModal();
       });
       frame.append(expand);
+      if (routes.length) {
+        const toggle = el('button', 'lift-toggle', 'Lift routes on'); toggle.type = 'button'; toggle.setAttribute('aria-pressed', 'true');
+        toggle.addEventListener('click', () => { linesVisible = !linesVisible; toggle.textContent = `Lift routes ${linesVisible ? 'on' : 'off'}`; toggle.setAttribute('aria-pressed', String(linesVisible)); liftOverlay(frame, scene, linesVisible ? routes : [], zoom); });
+        frame.append(toggle);
+      }
     } else frame.append(el("p", "satellite-empty", "No usable satellite crop from the past 30 days. Clouds or source availability can delay imagery."));
     figure.append(frame);
     const caption = el("figcaption", "satellite-caption");
@@ -129,7 +157,16 @@
         el("span", age > 7 ? "intel-old" : "", `Captured ${stamp(scene.capturedAt)} · ${age === 0 ? "today" : `${age} day${age === 1 ? "" : "s"} old`}${scene.retained ? " · saved image" : ""}`),
         el("span", "", `${scene.obscuredPercent}% estimated cloud / shadow in crop · ${scene.provider}`),
         el("small", "", `${scene.attribution} · Checked ${stamp(scene.checkedAt)}`), link(scene.source, "Scene metadata ↗"));
+      caption.append(el('span', '', `${scene.pixelWidth || 640} source-view pixels across · ${scene.qualityProfile === 'native-individual-v1' ? 'Individual crop · lossless detail' : 'Saved earlier-quality crop'}`));
+      if (scene.resolutionM >= 30) caption.append(el('span', 'intel-old', 'Coarser 30 m backup imagery · lower terrain detail than Sentinel-2.'));
     }
+    const routeList = el('div', 'lift-legend');
+    routeList.append(el('strong', '', 'SELECTED LIFT ROUTES'));
+    routes.forEach((r, i) => { if (https(r.source)) routeList.append(link(r.source, `${i+1}. ${r.name} ↗`)); });
+    routeList.append(el('small', '', routes.length ? 'Approximate mapped routes; no open/closed status is implied.' : 'No verified mapped lift route is available for this resort.'));
+    if (Number.isFinite(Date.parse(lifts.sourceDataAt))) routeList.append(el('small', '', `Map data as of ${stamp(lifts.sourceDataAt)}`));
+    caption.append(routeList);
+    if (lifts.attribution) caption.append(link(lifts.source, lifts.attribution), link(lifts.license, 'Lift data · ODbL ↗'), link(new URL('lift-routes.json', document.baseURI).href, 'Route coordinates ↗'));
     caption.append(link("https://browser.dataspace.copernicus.eu/", "Copernicus browser ↗"), link("https://worldview.earthdata.nasa.gov/", "NASA daily regional backup ↗"));
     figure.append(caption); layout.append(figure);
     const brief = el("article", "condition-panel");
@@ -179,7 +216,7 @@
   root.powderlineIntel = {
     select(name, scroll = true) { if (name !== 'all' && !catalog.some((r) => r.name === name)) return; select.value = name; render(); if (scroll) document.querySelector("#resort-intel").scrollIntoView({behavior: "smooth"}); },
     async refresh() {
-      await Promise.allSettled([['satellite.json', (v) => satellite = v], ['conditions.json', (v) => conditions = v]].map(async ([file, set]) => {
+      await Promise.allSettled([['satellite.json', (v) => satellite = v], ['conditions.json', (v) => conditions = v], ['lift-routes.json', (v) => lifts = v]].map(async ([file, set]) => {
         const response = await fetch(new URL(file, document.baseURI), {cache: "no-store"});
         if (response.ok) { const json = await response.json(); if (json.resorts && typeof json.resorts === "object") set(json); }
       }));

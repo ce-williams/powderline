@@ -74,41 +74,48 @@ GitHub scheduled runs continued to arrive 5–6 hours apart despite the 30-minut
 An active app heartbeat named **Powderline feed freshness watchdog** checks every 30 minutes in the original project chat. It verifies recovery after dispatch and reports failures. This backup requires the local computer and app to stay running; the GitHub schedule remains enabled when the local backup is unavailable. A server-hosted independent scheduler is still needed for an always-on freshness guarantee.
 # Satellite imagery and resort conditions
 
-The satellite section defaults to an all-resort regional gallery. Its 256 px
-WebP previews load lazily; a full image is requested only on resort selection.
-Nearby resorts from the same provider, sensor and acquisition time may share
-one geographic regional WebP, with normalized windows for each resort. Windows
-can span adjacent source tiles from that same acquisition. Acquisitions with
-different dates never merge. Sharing is used only if the encoded regional image
-is at least 5% smaller than separate WebPs. Large or sparse regions stay
-separate. Per-resort detail remains approximately 640 px across; digital zoom
-does not add sensor detail. Original scene metadata and local cloud estimates
-remain attached to each resort view.
+The satellite section defaults to an all-resort regional gallery. Up to 448 px
+WebP previews load lazily; individual full images load on resort selection.
+Full images are framed around up to three selected main lift routes, with a
+minimum 5 km square and 600 m padding beyond lift extents. Sentinel crops use
+approximately one output pixel per 10 m; Landsat crops use one per 30 m. Full
+RGB imagery goes through a lossless PNG intermediate and lossless WebP, without
+JPEG recompression, forced 640 px resizing, or shared regional atlases. Digital
+zoom cannot reveal detail finer than the satellite sensor captured.
 
-Full images and previews use content hashes in their filenames so unchanged
-imagery keeps a stable URL across deployments. A complete, recent collection
-copies each unique cached asset once without re-encoding. Browser caches can
-reuse a shared full image as the user switches between nearby resorts. The
-manifest includes storage measurements for previews, full images and the
-separate-WebP comparison. Browser/server cache lifetimes still depend on Pages.
+Full images and previews use content hashes so unchanged imagery keeps stable
+URLs across deployments. A complete recent collection copies each cached asset
+once without re-encoding; imagery checks remain on the existing workflow and
+reuse crops for six hours. Schema 3 invalidates earlier broad, compressed views.
+Failed collection may retain an earlier view, labeled with its quality and age.
+All images expire after 30 days. Cloud/invalid-data checks still apply.
 
-The existing Pages collection workflow also publishes `satellite.json`, small
-same-origin JPEG crops in `satellite/`, and `conditions.json`. No additional
-schedule is needed. A dedicated resort selector and links beneath each camera
-open the satellite and conditions briefing.
+`lift-routes.json` contains a small, attributed derivative of OpenSkiData / OSM,
+served publicly under ODbL. The map-data timestamp is independent of image
+capture time. The UI projects those longitude/latitude polylines onto the crop
+and keeps them aligned during zoom and expansion. A toggle hides the red lines;
+the numbered legend names the lifts and links to original OSM features. Resort
+membership comes from upstream ski-area associations, not nearest-neighbor
+assignment. Preferred named trunk lifts are selected where known, then longest
+major aerialways fill the remaining slots. This is a subset of lift
+infrastructure, not daily operating status. Disused/proposed routes are excluded.
+Hoedown currently has no eligible routes in the upstream dataset.
 
-Imagery uses public Sentinel-2 Level-2A cloud-optimized GeoTIFFs through Element
-84 Earth Search, with Microsoft Planetary Computer as an alternate host and
-Landsat Collection 2 Level-2 as an independent sensor fallback. These are direct
-open-data sources, not CalTopo's licensed tile service. Each 10 km crop is north
-up around an approximate resort reference point in `resort-locations.json`, not
-a resort boundary. Capture time is preserved. Search is limited to 30 days;
-newest qualifying scenes take precedence. Crops require 95% valid coverage and
-at most 35% estimated cloud/cloud-shadow using Sentinel SCL or Landsat QA bits.
-Snow classification is not used to infer texture. Provider cloud masks can be
-imperfect over snow. Checked images are reused for six hours; failed requests
-can retain a dated crop for at most 30 days, labeled as saved. NASA Worldview is
-also linked for coarser daily regional context. No imagery API key is needed.
+Refresh the small route extract manually when needed (no new schedule):
+
+```sh
+# Respect OpenSkiData's maximum of one automated download per day.
+curl --compressed -o /tmp/lifts.geojson https://tiles.openskimap.org/geojson/lifts.geojson
+# Read the upstream metadata.json openStreetMap.dataTimestamp for --source-date.
+python3 -B scripts/import_lift_routes.py --input /tmp/lifts.geojson --source-date <upstream-timestamp>
+```
+
+The existing Pages workflow publishes `satellite.json`, individual WebP assets
+in `satellite/`, `lift-routes.json`, and `conditions.json`. Imagery comes directly
+from Sentinel-2 Level-2A on Earth Search, with Planetary Computer and Landsat
+fallbacks; it does not use CalTopo's licensed tiles. Geometry is approximate and
+does not define resort or trail boundaries. NASA Worldview is linked for coarser
+regional context. No imagery API key is required.
 
 Conditions combine dated Colorado Ski Country USA / official resort reports
 with the National Weather Service hourly point forecast. Primary and secondary

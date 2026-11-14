@@ -2,6 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../resort-intel.js';
 const tools = globalThis.powderlineIntelTools;
+test('lift coordinates align with north-up image corners and center', () => {
+  const bbox = [-106, 39, -105, 40];
+  assert.deepEqual(tools.project([-106, 40], bbox), [0, 0]);
+  assert.deepEqual(tools.project([-105, 39], bbox), [1000, 1000]);
+  assert.deepEqual(tools.project([-105.5, 39.5], bbox), [500, 500]);
+});
 test('shared geographic windows stay within their source image', () => {
   assert.equal(tools.validView([0.2, 0.1, 0.6, 0.8]), true);
   for (const view of [[-0.1, 0, 1, 1], [0.6, 0, 0.6, 1], [0, 0, 0, 1], [NaN, 0, 1, 1], [0, 0, 1]]) assert.equal(tools.validView(view), false);
