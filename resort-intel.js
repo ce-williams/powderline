@@ -90,16 +90,7 @@
     });
     frame.append(svg);
   }
-  function renderGallery() {
-    gallery.replaceChildren();
-    const ready = catalog.filter((r) => usableImage(satellite.resorts?.[r.name])).length;
-    const summary = el("p", "gallery-summary", `${ready}/${catalog.length} resort snapshots available · Choose a mountain to zoom in and read its conditions.`);
-    gallery.append(summary);
-    for (const region of [...new Set(catalog.map((r) => r.region))]) {
-      const group = el("section", "satellite-region"); group.setAttribute("aria-label", `${region} satellite snapshots`);
-      group.append(el("h3", "eyebrow", region.toUpperCase()));
-      const grid = el("div", "satellite-gallery-grid");
-      catalog.filter((r) => r.region === region).forEach((resort) => {
+  function satelliteCard(resort) {
         const scene = satellite.resorts?.[resort.name];
         const card = el("button", "satellite-resort-card"); card.type = "button";
         card.setAttribute("aria-label", `View ${resort.name} satellite and conditions`);
@@ -115,11 +106,18 @@
           liftOverlay(preview, scene, lifts.resorts?.[resort.name]?.routes || []);
         } else preview.append(el("span", "", "Awaiting a usable scene"));
         const caption = el("div", "satellite-thumb-caption");
-        caption.append(el("strong", "", resort.name), el("span", "", usableImage(scene) ? `${scene.sensor} · ${stamp(scene.capturedAt)}` : "No recent usable image"), el("span", "gallery-open", "Zoom in & read conditions ↗"));
-        card.append(preview, caption); card.addEventListener("click", () => root.powderlineIntel.select(resort.name)); grid.append(card);
-      });
-      group.append(grid); gallery.append(group);
-    }
+        caption.append(el("strong", "", "Satellite overview"), el("span", "", usableImage(scene) ? `${scene.sensor} · ${stamp(scene.capturedAt)}` : "No recent usable image"), el("span", "gallery-open", "Zoom in & read conditions ↗"));
+        card.append(preview, caption); card.addEventListener("click", () => root.powderlineIntel.select(resort.name));
+        return card;
+  }
+  function renderResortTiles() {
+    document.querySelectorAll(".resort-satellite").forEach((host) => {
+      const resort = catalog.find((r) => r.name === host.dataset.resort);
+      if (resort) host.replaceChildren(satelliteCard(resort));
+    });
+  }
+  function renderGallery() {
+    gallery.replaceChildren(el("p", "gallery-summary", "Satellite images now lead each resort’s tiles below. Choose a mountain above for full imagery, lift references and its dated conditions read."));
   }
   function render() {
     gallery.hidden = select.value !== "all";
@@ -227,6 +225,7 @@
     renderTileLinks();
   }
   function renderTileLinks() {
+    renderResortTiles();
     document.querySelectorAll(".tile-intel").forEach((node) => node.remove());
     document.querySelectorAll(".camera-panel").forEach((card) => {
       const name = card.dataset.resort, row = conditions.resorts?.[name];
@@ -241,6 +240,7 @@
     });
   }
   root.powderlineIntel = {
+    renderTiles: renderResortTiles,
     select(name, scroll = true) { if (name !== 'all' && !catalog.some((r) => r.name === name)) return; select.value = name; render(); if (scroll) document.querySelector("#resort-intel").scrollIntoView({behavior: "smooth"}); },
     async refresh() {
       await Promise.allSettled([['satellite.json', (v) => satellite = v], ['conditions.json', (v) => conditions = v], ['lift-routes.json', (v) => lifts = v]].map(async ([file, set]) => {

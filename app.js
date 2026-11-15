@@ -17,6 +17,7 @@ const resortFilter = document.querySelector("#resort-filter");
 const cameraOnlyButton = document.querySelector("#camera-only");
 const cameraCards = [];
 const cameraRegions = new Map();
+const resortGroups = new Map();
 let activeResort = "all";
 
 const clockFmt = new Intl.DateTimeFormat("en-US", {
@@ -210,14 +211,28 @@ regions.forEach((region) => {
   section.setAttribute("aria-label", `${region.name} cameras`);
   const heading = makeElement("div", "region-heading");
   heading.append(makeElement("span", "region-name", region.name.toUpperCase()));
-  const grid = makeElement("div", "camera-group-grid");
-  const unavailable = makeElement("details", "unavailable-cameras");
-  const summary = makeElement("summary");
-  const unavailableGrid = makeElement("div", "camera-group-grid");
-  unavailable.append(summary, unavailableGrid);
-  section.append(heading, grid, unavailable);
+  section.append(heading);
   cameraWall.append(section);
-  cameraRegions.set(region.name, { section, grid, unavailable, unavailableGrid, summary });
+  cameraRegions.set(region.name, { section });
+  resortCatalog.filter((r) => r.region === region.name).forEach((resort) => {
+    const group = makeElement("section", "resort-group");
+    group.dataset.resort = resort.name;
+    group.setAttribute("aria-label", `${resort.name} satellite and webcams`);
+    const title = makeElement("div", "resort-group-heading");
+    title.append(makeElement("h3", "", resort.name), makeElement("span", "", "SATELLITE → WEBCAMS"));
+    const grid = makeElement("div", "camera-group-grid");
+    const satellite = makeElement("div", "resort-satellite");
+    satellite.dataset.resort = resort.name;
+    satellite.append(makeElement("p", "satellite-empty", "Loading satellite view…"));
+    grid.append(satellite);
+    const unavailable = makeElement("details", "unavailable-cameras");
+    const summary = makeElement("summary");
+    const unavailableGrid = makeElement("div", "camera-group-grid");
+    unavailable.append(summary, unavailableGrid);
+    group.append(title, grid, unavailable);
+    section.append(group);
+    resortGroups.set(resort.name, { section: group, grid, unavailable, unavailableGrid, summary });
+  });
 });
 
 orderedCameras.forEach((camera, index) => {
@@ -225,8 +240,7 @@ orderedCameras.forEach((camera, index) => {
   card.dataset.ready = "false";
   card.dataset.unavailable = "false";
   cameraCards.push(card);
-  const region = regions.find((entry) => entry.resorts.includes(camera.resort));
-  const target = cameraRegions.get(region.name);
+  const target = resortGroups.get(camera.resort);
   (cachedSnapshot(camera.id) ? target.grid : target.unavailableGrid).append(card);
 });
 
@@ -238,7 +252,7 @@ resortCatalog.filter((resort) => !cameraCatalog.some((camera) => camera.resort =
     note: resort.note || "No public mountain webcam was found during the latest source review. Check the ski area’s website for updates.",
   }, 0);
   cameraCards.push(card);
-  cameraRegions.get(resort.region).unavailableGrid.append(card);
+  resortGroups.get(resort.name).unavailableGrid.append(card);
 });
 
 const resortCount = resortCatalog.length;
@@ -256,13 +270,12 @@ function updateBatchStatus() {
 
 function updateRegionVisibility() {
   cameraCards.forEach((card) => {
-    const region = regions.find((entry) => entry.resorts.includes(card.dataset.resort));
-    const target = cameraRegions.get(region.name);
+    const target = resortGroups.get(card.dataset.resort);
     const grid = cachedSnapshot(card.dataset.cameraId) && card.querySelector("img.live-image") ? target.grid : target.unavailableGrid;
     if (card.parentElement !== grid) grid.append(card);
   });
-  cameraRegions.forEach(({ section, unavailable, unavailableGrid, summary }) => {
-    section.hidden = !section.querySelector(".camera-panel:not([hidden])");
+  resortGroups.forEach(({ section, unavailable, unavailableGrid, summary }, name) => {
+    section.hidden = activeResort !== "all" && name !== activeResort;
     const cards = [...unavailableGrid.querySelectorAll(".camera-panel:not([hidden])")];
     const areas = cards.filter((card) => card.dataset.directory === "true").length;
     const cameras = cards.length - areas;
@@ -270,6 +283,7 @@ function updateRegionVisibility() {
     summary.textContent = [cameras ? `${cameras} camera${cameras === 1 ? "" : "s"} currently unavailable` : "", areas ? `${areas} ski area${areas === 1 ? "" : "s"} without a verified feed` : ""].filter(Boolean).join(" · ");
     unavailable.open = activeResort !== "all";
   });
+  cameraRegions.forEach(({ section }) => { section.hidden = !section.querySelector(".resort-group:not([hidden])"); });
 }
 
 function paintClock() {
@@ -448,6 +462,7 @@ async function refreshWall({ visibleOnly = false } = {}) {
 renderSnowReports();
 populateResortFilter();
 updateRegionVisibility();
+window.powderlineIntel?.renderTiles();
 cameraCards.forEach((card) => {
   prepareImage(card);
   if (card.dataset.snapshotFetchedAt) setImageCheck(card);

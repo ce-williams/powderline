@@ -428,3 +428,19 @@ tbody td a:hover { color: var(--ice); text-decoration: underline; }
   .snow-report-meta { font-size: 11px; }
   .snow-report-meta a { padding: 6px 0; }
 }
+
+/* A resort is one visual group; its orbital view always leads the webcams. */
+.resort-group { margin: 0 0 24px; padding: 20px; border: 1px solid var(--line); background: #101b1b; min-width: 0; }
+.resort-group[hidden] { display: none; }
+.resort-group-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.resort-group-heading h3 { margin: 0; font: 600 23px var(--display); color: var(--paper); }
+.resort-group-heading > span { font: 9px var(--mono); color: var(--quiet); letter-spacing: .08em; }
+.resort-satellite { min-width: 0; }
+.resort-satellite .satellite-resort-card { width: 100%; display: block; }
+.resort-satellite .satellite-thumb-caption { gap: 7px; }
+.resort-satellite .satellite-thumb-caption strong { color: var(--ice); font-size: 15px; }
+.camera-only .resort-satellite { display: none; }
+@media (max-width: 520px) {
+  .resort-group { padding: 12px; }
+  .resort-group-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+}
